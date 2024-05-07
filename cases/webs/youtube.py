@@ -10,13 +10,24 @@
 # youtube [playlist url]
 # download all videos from playlist
 
+# list from files
+# saving to different destination
+
+
 import codecs
 import sys
+import os
+import pathlib
 from pathlib import Path
 
-import youtube_dl
-from moviepy.editor import *
-from moviepy.video.io.VideoFileClip import VideoFileClip
+# https://stackoverflow.com/a/75504772 when ERROR: Unable to extract uploader id; please report this issue on https://yt-dl.org/bug
+# pip install --force-reinstall https://github.com/yt-dlp/yt-dlp/archive/master.tar.gz
+
+# ffmpeg on system path
+# download ffmpeg: https://www.gyan.dev/ffmpeg/builds/
+# https://video.stackexchange.com/questions/20495/how-do-i-set-up-and-use-ffmpeg-in-windows
+import yt_dlp as youtube_dl
+from audio_extract import extract_audio
 
 # Examples for lib
 # https://www.programcreek.com/python/example/98358/youtube_dl.YoutubeDL
@@ -36,7 +47,7 @@ if sys.platform == 'win32':
     # https://github.com/ytdl-org/youtube-dl/issues/820
     codecs.register(lambda name: codecs.lookup('utf-8') if name == 'cp65001' else None)
 
-home = str(Path.home())
+home = str(pathlib.Path.home())
 
 # read an options and ur
 argIndex = 1
@@ -52,13 +63,14 @@ url_to_download = sys.argv[argIndex:]
 # make it more sofisticated and configurable
 dir = home + '\\Videos\\YoutubeDownload\\'
 albumFolder = '%(creator)s - %(playlist_title)s\\'
-outtmpl = dir + albumFolder +'%(autonumber)s-%(title)s.%(ext)s'
-audioDir = dir + 'Audio\\'
+mp3albumFolder = '%(creator)s - %(playlist_title)s - audio\\'
+outtmpl = dir + albumFolder + '%(autonumber)s-%(title)s.%(ext)s'
 retries = 3
 cachedir = home + '\\Videos\\cacheYoutube\\'
 verbose = None
 format = 'mp4'
-ydl_opts = {
+
+ydl_opts = { #https://github.com/ytdl-org/youtube-dl/blob/master/youtube_dl/YoutubeDL.py#L128-L278
     'forceformat': format,
     'format': format,
     'outtmpl': outtmpl,
@@ -67,33 +79,41 @@ ydl_opts = {
     'verbose': verbose,
     'cachedir': cachedir,
     'ignoreerrors': True,
+#      'writesubtitles": True,
+#      'writeautomaticsub': 'true',
+#         allsubtitles:      Downloads all the subtitles of the video
+#                            (requires writesubtitles or writeautomaticsub)
+#         listsubtitles:     Lists all available subtitles for the video
+#         subtitlesformat:   The format code for subtitles
+#      'subtitleslangs': 'en,ge,sk,cz',
 }
 
 
-def mp3(mp3_file_name, mp4_file):
+def mp3(mp3_file_name, mp4_file, audioDir = dir + 'audio\\'):
     if alsoAudioFile:
-        videofile = VideoFileClip(mp4_file)
+        print('             MP3 Video ' + mp4_file)
+        print('             MP3 Audio ' + audioDir + mp3_file_name + MP3)
         if not os.path.exists(audioDir):
-            os.mkdir(audioDir)
-        videofile.audio.write_audiofile(audioDir + mp3_file_name + MP3)
+            pathlib.Path(audioDir).mkdir(parents=True, exist_ok=True)
 
+        extract_audio(input_path=mp4_file, output_path = audioDir + mp3_file_name + MP3)
 
 with youtube_dl.YoutubeDL(ydl_opts) as ydl:
     info = ydl.extract_info(url_to_download[0], download=True)
-    if TYPE in info.keys() and info[TYPE] == PLAYLIST:
-        for video in info[ENTRIES]:
-            print('Video #%d: %s' % (video[PLAYLIST_INDEX], video[TITLE]))
-            filename = f"{video[PLAYLIST_INDEX]:05d}-" + video[TITLE]
+    if TYPE in info.keys() and info[TYPE] == PLAYLIST and alsoAudioFile:
 
-            #if creator is not present, then youtube dl use NA string
-            creator = video[CREATOR]
-            if creator is None: creator = 'NA'
-            path_with_album = dir + creator + ' - ' + video[PLAYLIST_TITLE]
+        # if creator is not present, then youtube dl use NA string
+        creator = 'NA' #video[CREATOR]
+        if creator is None: creator = 'NA'
 
-            mp4file = path_with_album + '\\' + filename + '.' + video[EXT]
+        path_with_album = dir + creator + ' - ' + info[TITLE]
+        source_dir = Path(path_with_album)
+        files = source_dir.glob('*.mp4')
+
+        for file in files:
+            filename = file.name.replace('.mp4', MP3)
             audioDir = path_with_album + ' - audio\\'
-            mp3(filename, mp4file)
+            extract_audio(input_path=file, output_path = audioDir + filename)
     else:
         mp3(info.get(TITLE), ydl.prepare_filename(info))
-
 

@@ -1,1 +1,1 @@
-@python %BORING_STUFF_PATH%webs\youtube.py %*
+@python %BORING_STUFF_PATH%\cases\webs\youtube.py %*

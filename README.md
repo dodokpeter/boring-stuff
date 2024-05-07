@@ -94,3 +94,8 @@ On Unix systems you can do the following to append it to your system’s search 
 export PATH=$PATH:/path/to/directory/of/executable/downloaded/in/previous/step
 ```
 On Windows you will need to update the Path system variable to add the full directory path to the executable geckodriver manually or command line(don't forget to restart your system after adding executable geckodriver into system PATH to take effect). The principle is the same as on Unix.
+
+
+embedable for win, then:
+$ curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+$ python get-pip.py
