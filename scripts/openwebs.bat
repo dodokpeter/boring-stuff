@@ -1,1 +1,1 @@
-@python %BORING_STUFF_PATH%webs\openwebs.py %*
+@python %BORING_STUFF_PATH%\cases\webs\openwebs.py %*

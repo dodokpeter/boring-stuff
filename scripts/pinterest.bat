@@ -1,1 +1,1 @@
-@python %BORING_STUFF_PATH%webs\pinterest.py %*
+@python %BORING_STUFF_PATH%\cases\webs\pinterest.py %*

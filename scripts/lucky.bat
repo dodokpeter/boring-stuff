@@ -1,1 +1,1 @@
-@python %BORING_STUFF_PATH%webs\lucky.py %*
+@python %BORING_STUFF_PATH%\cases\webs\lucky.py %*

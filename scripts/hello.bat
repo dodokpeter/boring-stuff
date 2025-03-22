@@ -1,1 +1,0 @@
-@python %BORING_STUFF_PATH%\scripts\hello.py %*

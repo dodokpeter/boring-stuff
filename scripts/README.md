@@ -1,7 +1,5 @@
 ## Running from Windows
-This folder is intended as bat files for python scripts. 
-This bat can be called from command line directly, therefore you need to put them
-on path variable. 
+This folder is intended as bat files for python scripts.
 
 Also you need to add system or user variable **BORING_STUFF_PATH** and point it to the directory, where you cloned the repository.
 

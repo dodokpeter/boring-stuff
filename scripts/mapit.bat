@@ -1,1 +1,1 @@
-@python %BORING_STUFF_PATH%maps\mapit.py %*
+@python %BORING_STUFF_PATH%\cases\maps\mapit.py %*
