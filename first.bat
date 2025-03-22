@@ -4,38 +4,63 @@ ECHO Let's start with boring stuff in your windows machine
 ECHO Welcome and enjoy automation
 ECHO *********************************************************
 ECHO Adding scripts to the path..
+@ECHO ON
 
-SETX BORING_STUFF_PATH %CD%\
+SETX BORING_STUFF_PATH "%CD%"
 
-REM append user path
+REM Append user path
 SET Key="HKCU\Environment"
-FOR /F "usebackq tokens=2*" %%A IN (`REG QUERY %Key% /v PATH`) DO Set CurrPath=%%B
+FOR /F "usebackq tokens=2*" %%A IN (`REG QUERY %Key% /v PATH`) DO SET CurrPath=%%B
+
+REM Display current PATH
+ECHO Curren path
 ECHO %CurrPath%
-REM set permanently path to scripts into user environment variable
-SETX PATH "%CurrPath%"%BORING_STUFF_PATH%\scripts\
+
+REM Set permanently path to scripts into user environment variable
+SETX PATH "%CurrPath%;%BORING_STUFF_PATH%\scripts\"
 
 ECHO *********************************************************
 ECHO %PATH%
 ECHO *********************************************************
 
-REM Set PYTHONPATH - to be able to run script from windows command line
-REM Widows identifies python packages via this environment variable
-REM In it is not set, it returns, that it cannot find python module from this project
-REM TODO if PYTHONPATH already there, then add new value
-SETX PYTHONPATH %BORING_STUFF_PATH%
 
-ECHO Checking python..
-FOR /f "usebackq tokens=*" %%A IN (`@python %BORING_STUFF_PATH%\python\version.py %*`) DO Set PYTHON_VERSION=%%A
+
+REM Check if PYTHONPATH already exists
+SET KEY="HKCU\Environment"
+FOR /F "usebackq tokens=2*" %%A IN (`REG QUERY %KEY% /v PYTHONPATH`) DO SET EXISTING_PYTHONPATH=%%B
+
+REM If PYTHONPATH already exists, append the new value
+IF DEFINED EXISTING_PYTHONPATH (
+    SET NEW_PYTHONPATH=%EXISTING_PYTHONPATH%;%BORING_STUFF_PATH%
+) ELSE (
+    SET NEW_PYTHONPATH=%BORING_STUFF_PATH%
+)
+
+REM Set PYTHONPATH permanently
+SETX PYTHONPATH "%NEW_PYTHONPATH%"
+
+REM Check Python version by running the version.py script
+ECHO Checking Python...
+FOR /f "usebackq tokens=*" %%A IN (`python %BORING_STUFF_PATH%\python\version.py %*`) DO SET PYTHON_VERSION=%%A
+
 ECHO %PYTHON_VERSION%
 
+
+
 ECHO Creating new configuration..
-REM HOME user variable should be pointing to user home.
-REM Some company policy sets  %HOMEDRIVE% to different network drive and %HOMEPATH% to \
 
-SET HOME_DIR=%HOME%\.boring-stuff
-RMDIR /s %HOME_DIR%
-MKDIR %HOME_DIR%
+REM Use USERPROFILE instead of HOME for a reliable home directory
+SET HOME_DIR=%USERPROFILE%\boring-stuff
 
-COPY BoringStuff.yml %HOME_DIR%\BoringStuff.yml
+REM Delete existing directory safely
+IF EXIST "%HOME_DIR%" RMDIR /s /q "%HOME_DIR%"
+
+REM Create the directory
+MKDIR "%HOME_DIR%"
+
+REM Copy the configuration file, forcing overwrite
+COPY /Y "BoringStuff.yml" "%HOME_DIR%\BoringStuff.yml"
+
+ECHO Configuration copied successfully!
 
 ECHO End initialisation process, thanks

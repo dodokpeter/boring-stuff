@@ -3,26 +3,45 @@ My **python** scripts to ease my life.
 
 ## Set up
 ### Configuration
-if needed, copy file BoringStuff.ini from root of the project to the user HOME directory.
+
+You need to add path to this repository to the User Path. Then restart terminal.
 
 ### Python 
-Python should be installed and configured. I prefer to use Anaconda3 for Python setup, which you can download from https://www.anaconda.com/products/individual
+
+Python should be installed and configured. 
+My settings are python 3.12 in venv:
+- basic shared one in the root
+- if script contain special dependency, I have venv in script directory
+
+Someone can prefer to use Anaconda3 for Python setup, which you can download from https://www.anaconda.com/products/individual
 Necessary packages, that need to be installed into python:
 - pyyaml   '''pip install pyyaml''' - editing and readin yaml files, in Anaconda3 it's preinstalled
 
+#### Permanently via System or User PATH
+Before first run add python interpreter to the path so you can type commands from command line.
+To make this change permanent for all future sessions:
+
+- Under User Variables or System Variables, find the Path variable and click Edit.
+- Add the full path to the Scripts folder of your IntelliJ IDEA virtual environment (where the Python interpreter is located). For example:
+  - f.e. C:\Users\YourUser\path\to\project\venv\Scripts
+- Click OK to save. Restart IDE.
+
 ### First run
+
 When you are about to start using boring stuff scripts, Please run this command from directory, where you've cloned this project:
 ```
 first.bat
 ```
+
+After finishing script restart terminal, you should have in your home folder a new configuration folder -> boring-stuf
+
 If you want to check if everything works fine, just type in command line.
 Run command
 ```
 hello
 ```
-to ensure that scrips can be run from CMD. 
-  
-  
+to ensure that scrips can be run from CMD.
+
 <a href="./scripts/README.md">Available commands</a>
 
 ### Documentation notes

@@ -85,11 +85,14 @@ celerybeat-schedule
 # SageMath parsed files
 *.sage.py
 
+to*Vent.bat
+
 # Environments
 .env
 .venv
 env/
 venv/
+venv*/
 ENV/
 env.bak/
 venv.bak/
