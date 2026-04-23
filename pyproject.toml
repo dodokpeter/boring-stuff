@@ -1,0 +1,15 @@
+[project]
+name = "boring-stuff"
+version = "0.1.0"
+dependencies = [
+    "pyyaml",
+    "openpyxl",
+]
+
+[project.scripts]
+hello = "scripts.hello:main"
+clean-logs = "scripts.cleanup:run"
+
+[tool.setuptools]
+packages = []  # Tells it not to look for library packages
+py-modules = [] # Tells it not to look for top-level modules

@@ -1,120 +1,67 @@
-# BoringStuff
-My **python** scripts to ease my life. 
+Automating the mundane to focus on what matters.
 
-## Set up
-### Configuration
+A collection of Python utility scripts for daily productivity.
 
-You need to add path to this repository to the User Path. Then restart terminal.
+## ⚡ Quick Start (New PC)
 
-### Python 
-
-Python should be installed and configured. 
-My settings are python 3.12 in venv:
-- basic shared one in the root
-- if script contain special dependency, I have venv in script directory
-
-Someone can prefer to use Anaconda3 for Python setup, which you can download from https://www.anaconda.com/products/individual
-Necessary packages, that need to be installed into python:
-- pyyaml   '''pip install pyyaml''' - editing and readin yaml files, in Anaconda3 it's preinstalled
-
-#### Permanently via System or User PATH
-Before first run add python interpreter to the path so you can type commands from command line.
-To make this change permanent for all future sessions:
-
-- Under User Variables or System Variables, find the Path variable and click Edit.
-- Add the full path to the Scripts folder of your IntelliJ IDEA virtual environment (where the Python interpreter is located). For example:
-  - f.e. C:\Users\YourUser\path\to\project\venv\Scripts
-- Click OK to save. Restart IDE.
-
-### First run
-
-When you are about to start using boring stuff scripts, Please run this command from directory, where you've cloned this project:
-```
-first.bat
-```
-
-After finishing script restart terminal, you should have in your home folder a new configuration folder -> boring-stuf
-
-If you want to check if everything works fine, just type in command line.
-Run command
-```
-hello
-```
-to ensure that scrips can be run from CMD.
-
-<a href="./scripts/README.md">Available commands</a>
-
-### Documentation notes
-Each folder contains readme file for description of available scripts
-
-### Dependencies:
-#### Python libraries
-
-**openpyxl** - working with excel files (Anaconda contains this lib)
-
-#### Python libraries over conda command line
-
-**pypdf2** - working with PDF files
-```
-conda install -c conda-forge pypdf2 
-```
-**python-docx** - working with .docx files
-```
-conda install -c conda-forge python-docx 
-```
-**pillow**
-
-I had this same problem from . import _imaging as core ImportError: DLL load failed: The specified procedure could not be found. recently with Anaconda Navigator 1.6.12 running Python 3.6.4. I was loading PIL 4.3.0. Upgrading PIL to 5.0.0 via Anaconda Navigator did not fix it. I ultimately fixed it via the following two step procedure. 
-
-1. Uninstall it via 
-```conda remove --force pillow ```
-
-2. Reinstall. Fearing something was wrong with the original Anaconda distribution, I reinstalled from conda-forge instead of conda's default. So I used 
-```
-conda install -c conda-forge pillow
-```
-NOTE: not working still: ImportError: DLL load failed: The specified module could not be found.
-
-Next step was:
-```
-conda uninstall pillow
-conda install pillow=5.0.0
-```
-This works.
+1.  **Install uv** (The modern way to manage Python):
+    ```powershell
+    powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+    ```
+2.  **Clone & Setup**:
+    ```bash
+    git clone https://github.com/youruser/BoringStuff.git
+    cd BoringStuff
+    # This creates a venv and installs all dependencies in seconds
+    uv sync
+    ```
+3.  **Initialize**:
+    ```bash
+    ./setup.ps1
+    ```
+4. Run this command in PowerShell:
+   ```uv pip install -e .```
+   Result: uv will create a shim. Now, as long as your venv is active, you can just type hello.
 
 
-**pytube3**
+---
 
-I run the command in anaconda terminal
-```
-conda install -c conda-forge youtube-dl
-```
-**MoviePy**
+## 🔧 Environment & Dependencies
 
-Installation command
-```
-conda install -c conda-forge moviepy
-```
+### Python Management
+This project uses **Python 3.12+**. We no longer recommend manual Path edits or Anaconda for this repo.
+* **Virtual Environments:** Managed automatically via `uv` or `venv`.
+* **Dependencies:** All core libraries are tracked in `requirements.txt`.
 
-#### Selenium
+### Core Libraries Used:
+| Library | Usage |
+| :--- | :--- |
+| `pyyaml` | Configuration and data parsing |
+| `openpyxl` | Excel automation |
+| `pypdf2` | PDF manipulation |
+| `python-docx` | Word document generation |
+| `pillow` | Image processing |
+| `moviepy` | Video editing |
 
- **- geckodriver for Selenium**
- 
-selenium.common.exceptions.WebDriverException: Message: 'geckodriver' executable needs to be in PATH.
+---
 
-First of all you will need to download latest executable geckodriver from 
-https://github.com/mozilla/geckodriver/releases
-to run latest firefox using selenium
+## 🌐 Selenium Setup (Geckodriver)
+If you use the web automation scripts, you need the Firefox `geckodriver`.
+1.  **Automatic (Recommended):** The scripts now use `webdriver-manager` (added to requirements), so you likely **don't** need to download drivers manually anymore.
+2.  **Manual:** If needed, download from [geckodriver releases](https://github.com/mozilla/geckodriver/releases) and place it in the `bin/` folder of this repo.
 
-Actually The Selenium client bindings tries to locate the geckodriver executable from the system PATH. You will need to add the directory containing the executable to the system path.
+---
 
-On Unix systems you can do the following to append it to your system’s search path, if you’re using a bash-compatible shell:
-```
-export PATH=$PATH:/path/to/directory/of/executable/downloaded/in/previous/step
-```
-On Windows you will need to update the Path system variable to add the full directory path to the executable geckodriver manually or command line(don't forget to restart your system after adding executable geckodriver into system PATH to take effect). The principle is the same as on Unix.
+## 📖 Available Commands
+Run `hello` in your terminal to verify the installation.
 
+* [Command Reference](./scripts/README.md) - Full list of available automation scripts.
 
-embedable for win, then:
-$ curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-$ python get-pip.py
+---
+
+## 🛠️ Internal Maintenance Notes
+<details>
+<summary>Troubleshooting Pillow/DLL issues</summary>
+
+If you encounter `ImportError: DLL load failed` for Pillow on Windows, ensure you are not mixing Conda and Pip environments. Using the `uv` setup above bypasses the old Anaconda 1.6.12 versioning conflicts.
+</details>
