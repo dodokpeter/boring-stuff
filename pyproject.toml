@@ -4,11 +4,15 @@ version = "0.1.0"
 dependencies = [
     "pyyaml",
     "openpyxl",
+    "yt-dlp[build-in-js-interpreter,javascript]>=2026.3.17",
+    "quickjs>=1.19.4",
 ]
 
 [project.scripts]
 hello = "scripts.hello:main"
 clean-logs = "scripts.cleanup:run"
+youtube = "scripts.webs.youtube:main"
+yt = "scripts.webs.youtube:main"
 
 [tool.setuptools]
 packages = []  # Tells it not to look for library packages

@@ -50,14 +50,36 @@ If you use the web automation scripts, you need the Firefox `geckodriver`.
 1.  **Automatic (Recommended):** The scripts now use `webdriver-manager` (added to requirements), so you likely **don't** need to download drivers manually anymore.
 2.  **Manual:** If needed, download from [geckodriver releases](https://github.com/mozilla/geckodriver/releases) and place it in the `bin/` folder of this repo.
 
----
+## Additional installations
+
+### youtube command
+
+For the MP3 extraction to work, ffmpeg must be on your system path.
+The Modern Way: The easiest way to install it is via winget (Windows Package Manager):
+
+```winget install ffmpeg```
+After installing, restart your terminal. yt-dlp will automatically find it.
+
+Path environment variable modified; restart your shell to use the new value.
+Command line alias added: "ffmpeg"
+Command line alias added: "ffplay"
+Command line alias added: "ffprobe"
+
+YouTube recently started requiring a JavaScript (JS) runtime to extract video information properly. 
+Without it, you get that "Video not available" error even if the video is perfectly fine.
+```winget install denoland.deno```
+
+If you still get "Challenge solving failed"
+If the logs say challenge solving failed even after the steps above, it's time to force the download directly into your script's environment. Use this command:
+```uv run yt-dlp --remote-components ejs:github --update-base```
+
 
 ## 📖 Available Commands
 Run `hello` in your terminal to verify the installation.
 
 * [Command Reference](./scripts/README.md) - Full list of available automation scripts.
 
----
+
 
 ## 🛠️ Internal Maintenance Notes
 <details>
