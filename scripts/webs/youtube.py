@@ -49,8 +49,12 @@ def main():
         ydl_opts['remote_components'] = {'ejs:github'}
     # Adjust folder structure if it's a playlist
     if args.playlist:
-        ydl_opts['outtmpl'] = str(base_dir / '%(creator)s - %(playlist_title)s' / '%(autonumber)s-%(title)s.%(ext)s')
-
+        # The NA modification: We can tell yt-dlp to restrict only the filename part
+        ydl_opts['outtmpl'] = str(base_dir / '%(playlist_title,playlist)q' / '%(playlist_index)s - %(title)q.%(ext)s')
+    else:
+        # Adding 'q' to the end of the variable (e.g., %(title)q)
+        # tells yt-dlp to quote/sanitize the string for filenames automatically
+        ydl_opts['outtmpl'] = str(base_dir / '%(title)s.%(ext)s')
     # 4. Handle Format & Audio Extraction
     if args.audio:
         # Download video, then keep the video and extract audio (keeping both)
