@@ -106,3 +106,51 @@ def test_skips_missing_paths_and_falls_back_when_nothing_saved(monkeypatch, isol
         clipsave.main()
 
     assert list(isolated_downloads.iterdir()) == []
+
+
+def test_text_runs_at_the_same_timestamp_dont_overwrite_each_other(monkeypatch, isolated_downloads):
+    monkeypatch.setattr(clipsave.ImageGrab, "grabclipboard", lambda: None)
+    monkeypatch.setattr(clipsave, "get_clipboard_text", lambda: "first run")
+    clipsave.main()
+
+    monkeypatch.setattr(clipsave, "get_clipboard_text", lambda: "second run")
+    clipsave.main()
+
+    first = isolated_downloads / "2026-08-28 09-45-50.txt"
+    second = isolated_downloads / "2026-08-28 09-45-50 (1).txt"
+    assert first.read_text(encoding="utf-8") == "first run"
+    assert second.read_text(encoding="utf-8") == "second run"
+
+
+def test_image_runs_at_the_same_timestamp_dont_overwrite_each_other(monkeypatch, isolated_downloads):
+    monkeypatch.setattr(clipsave.ImageGrab, "grabclipboard", lambda: Image.new("RGB", (5, 5), color="red"))
+    clipsave.main()
+    clipsave.main()
+
+    assert (isolated_downloads / "2026-08-28 09-45-50.png").exists()
+    assert (isolated_downloads / "2026-08-28 09-45-50 (1).png").exists()
+
+
+def test_copied_file_runs_at_the_same_timestamp_dont_overwrite_each_other(tmp_path, monkeypatch, isolated_downloads):
+    source = tmp_path / "notes.txt"
+    source.write_text("original content", encoding="utf-8")
+    monkeypatch.setattr(clipsave.ImageGrab, "grabclipboard", lambda: [str(source)])
+
+    clipsave.main()
+    clipsave.main()
+
+    assert (isolated_downloads / "2026-08-28 09-45-50 notes.txt").exists()
+    assert (isolated_downloads / "2026-08-28 09-45-50 notes (1).txt").exists()
+
+
+def test_zipped_folder_runs_at_the_same_timestamp_dont_overwrite_each_other(tmp_path, monkeypatch, isolated_downloads):
+    folder = tmp_path / "project"
+    folder.mkdir()
+    (folder / "a.txt").write_text("a", encoding="utf-8")
+    monkeypatch.setattr(clipsave.ImageGrab, "grabclipboard", lambda: [str(folder)])
+
+    clipsave.main()
+    clipsave.main()
+
+    assert (isolated_downloads / "2026-08-28 09-45-50 project.zip").exists()
+    assert (isolated_downloads / "2026-08-28 09-45-50 project (1).zip").exists()

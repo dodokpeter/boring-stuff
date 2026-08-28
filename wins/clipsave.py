@@ -21,6 +21,17 @@ def report_saved(action, path):
     print(f"Folder: {path.parent}")
 
 
+def unique_path(path):
+    if not path.exists():
+        return path
+    n = 1
+    while True:
+        candidate = path.with_name(f"{path.stem} ({n}){path.suffix}")
+        if not candidate.exists():
+            return candidate
+        n += 1
+
+
 def get_clipboard_text():
     import tkinter as tk
 
@@ -43,11 +54,12 @@ def save_clipboard_files(paths, downloads, timestamp):
             continue
 
         if source.is_dir():
-            archive_base = downloads / f"{timestamp} {source.name}"
+            target_zip = unique_path(downloads / f"{timestamp} {source.name}.zip")
+            archive_base = target_zip.with_suffix("")
             archive_path = Path(shutil.make_archive(str(archive_base), "zip", root_dir=source.parent, base_dir=source.name))
             report_saved("Zipped folder", archive_path)
         else:
-            dest = downloads / f"{timestamp} {source.name}"
+            dest = unique_path(downloads / f"{timestamp} {source.name}")
             shutil.copy2(source, dest)
             report_saved("Copied file", dest)
         saved_any = True
@@ -63,7 +75,7 @@ def main():
     clip_content = ImageGrab.grabclipboard()
 
     if isinstance(clip_content, Image.Image):
-        path = downloads / f"{timestamp}.png"
+        path = unique_path(downloads / f"{timestamp}.png")
         clip_content.save(path)
         report_saved("Saved image", path)
         return
@@ -74,7 +86,7 @@ def main():
 
     text = get_clipboard_text()
     if text:
-        path = downloads / f"{timestamp}.txt"
+        path = unique_path(downloads / f"{timestamp}.txt")
         path.write_text(text, encoding="utf-8")
         report_saved("Saved text", path)
         return
