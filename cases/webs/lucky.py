@@ -1,35 +1,41 @@
 #! python3
-# luckysearch - Opens several Google search results.
-# luckysearch -n3 search item
+# lucky - "Feeling lucky" Google search. Opens the top N result pages.
+# Falls back to opening the plain Google search results page if scraping
+# gets blocked (Google/DuckDuckGo increasingly reject non-browser clients).
+#
+# lucky tips for developers
+# lucky -n3 tips for developers
 
-import requests
-import sys
+import argparse
 import webbrowser
-import bs4
-import re
+from urllib.parse import quote_plus
 
-print('Googling...')
+from googlesearch import search
 
 
-# read a number of results opened
-argIndex = 1
-count = 4
+def main():
+    parser = argparse.ArgumentParser(description="Open the top Google results for a search")
+    parser.add_argument("-n", type=int, default=4, dest="count", help="number of result pages to open (default: 4)")
+    parser.add_argument("query", nargs="+", help="search terms")
+    args = parser.parse_args()
 
-if str(sys.argv[1]).startswith('-n'):
-    count = int(re.compile(r'(\d+)$').search(sys.argv[1]).group(1))
-    argIndex += 1
+    query = " ".join(args.query)
+    print(f"Googling '{query}'...")
 
-searchUrl = 'http://google.com/search?q=' + ' '.join(sys.argv[argIndex:])
-res = requests.get(searchUrl)
-res.raise_for_status()
+    urls = []
+    try:
+        urls = list(search(query, num_results=args.count))
+    except Exception as e:
+        print(f"Scraping failed ({e}), falling back to search results page.")
 
-# Retrieve top search result links.
-soup = bs4.BeautifulSoup(res.text, 'html5lib')
+    if not urls:
+        print("No results scraped, opening search results page instead.")
+        webbrowser.open(f"https://www.google.com/search?q={quote_plus(query)}")
+        return
 
-webbrowser.open(searchUrl)
+    for url in urls:
+        webbrowser.open(url)
 
-# Open a browser tab for each result.
-linkElems = soup.select('.r a')
-numOpen = min(count, len(linkElems))
-for i in range(numOpen):
-    webbrowser.open('http://google.com' + linkElems[i].get('href'))
+
+if __name__ == "__main__":
+    main()
