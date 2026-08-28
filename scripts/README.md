@@ -73,3 +73,15 @@ Run command:
 Timestamp format is `YYYY-MM-dd HH-mm-ss` (e.g. `2026-08-28 09-45-50`).
 Prints a message and exits non-zero if the clipboard is empty or nothing
 could be saved.
+
+## B64d / B64e
+Base64 decode/encode the clipboard's text, in place - result goes straight
+back onto the clipboard, no files, no arguments.
+
+Run command:
+
+    b64d   (decode)
+    b64e   (encode)
+
+If the clipboard isn't valid base64 (for `b64d`), or is empty, prints a
+message and exits non-zero without touching the clipboard.
