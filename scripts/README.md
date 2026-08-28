@@ -55,3 +55,21 @@ Invert picture in negative colors.
 Run command:
 
     negative [directory_with_picture]
+
+## Clipsave
+Save clipboard content to your Downloads folder. Auto-detects the content
+type - no prompt, no flags needed:
+
+- image -> `<timestamp>.png`
+- text -> `<timestamp>.txt`
+- a copied file -> `<timestamp> <original name>` (copied, original left in place)
+- a copied folder -> `<timestamp> <folder name>.zip`
+- multiple copied files/folders -> each one handled per the rules above
+
+Run command:
+
+    clipsave
+
+Timestamp format is `YYYY-MM-dd HH-mm-ss` (e.g. `2026-08-28 09-45-50`).
+Prints a message and exits non-zero if the clipboard is empty or nothing
+could be saved.
