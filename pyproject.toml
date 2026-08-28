@@ -17,8 +17,8 @@ clean-logs = "scripts.cleanup:run"
 youtube = "scripts.webs.youtube:main"
 yt = "scripts.webs.youtube:main"
 clipsave = "wins.clipsave:main"
-b64d = "wins.base64_clip:main_decode"
-b64e = "wins.base64_clip:main_encode"
+b64d = "devs.base64_clip:main_decode"
+b64e = "devs.base64_clip:main_encode"
 
 [tool.setuptools]
 packages = []  # Tells it not to look for library packages

@@ -1,6 +1,6 @@
 import pytest
 
-from wins import base64_clip
+from devs import base64_clip
 
 
 @pytest.fixture
