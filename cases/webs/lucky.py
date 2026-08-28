@@ -13,11 +13,11 @@ from urllib.parse import quote_plus
 from googlesearch import search
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description="Open the top Google results for a search")
     parser.add_argument("-n", type=int, default=4, dest="count", help="number of result pages to open (default: 4)")
     parser.add_argument("query", nargs="+", help="search terms")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     query = " ".join(args.query)
     print(f"Googling '{query}'...")
