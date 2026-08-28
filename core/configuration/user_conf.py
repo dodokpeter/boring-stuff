@@ -17,7 +17,7 @@ def create_config_path(config_name):
             f = open(config, "w")
             f.write("# This is config file: " + config_name)
             f.write("\n")
-            f.write("app: boring-stuff-anki-automation")
+            f.write("app: boring-stuff")
             f.close()
         return config
 
