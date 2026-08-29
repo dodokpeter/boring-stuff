@@ -70,7 +70,10 @@ Run command:
 ### cases/pictures
 
 #### Negative
-Invert picture in negative colors.
+Invert every picture in a folder to its negative, saved into a `negative`
+subfolder alongside the originals (so re-running doesn't invert its own
+output). Non-image files in the folder are skipped with a message.
+
 Run command:
 
     negative [directory_with_picture]
@@ -103,10 +106,19 @@ Open a batch of your usual sites in the browser, grouped by tag.
 
 Run command:
 
-    openwebs         (opens all groups)
-    openwebs init    (mail/calendar/translate)
-    openwebs s       (social sites)
-    openwebs n       (news sites)
+    openwebs           (opens all groups)
+    openwebs init      (mail/calendar/translate)
+    openwebs s         (social sites)
+    openwebs n         (news sites)
+    openwebs s n       (multiple groups at once)
+
+Groups default to `init`/`s`/`n` above, but can be fully replaced via
+config (in `~/.boring-stuff/BoringStuff.yml`) - each key becomes a tag:
+
+    openwebs:
+      work:
+        - https://mail.example.com
+        - https://tickets.example.com
 
 #### Pinterest
 Open random picture from pinteres board

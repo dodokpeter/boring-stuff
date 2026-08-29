@@ -21,26 +21,10 @@ Running list of things discussed but not yet done. Remove an item once it's buil
 Findings from a full read of the repo. Tests currently pass (40/40).
 Grouped roughly by payoff; each item names the file it applies to.
 
-## Robustness / UX
-
-- [cases/pictures/negative.py](cases/pictures/negative.py) - string path
-  concatenation instead of `pathlib`, output written next to the input so a
-  second run inverts its own `negative*.png` output, and `ImageOps.invert`
-  fails on RGBA/palette PNGs.
-- [cases/maps/mapit.py](cases/maps/mapit.py) - uses a bare Tkinter root for the
-  clipboard (never withdrawn or destroyed, flashes a window) while `pyperclip` is
-  already a dependency.
-- Emoji in `print` statements ([cases/webs/youtube.py](cases/webs/youtube.py),
-  `setup.ps1`) raise `UnicodeEncodeError` on a legacy Windows console codepage.
-- [cases/webs/openwebs.py](cases/webs/openwebs.py) - the site list is hardcoded and
-  shadows the builtin `all`; the groups belong in user config.
-- No script prints a `--version` or supports `-h` consistently (the argparse-based
-  ones do; the `sys.argv`-based ones do not).
-
 ## Tooling and CI
 
-- No linter or formatter configured. Adding `ruff` (lint + format) would catch the
-  builtin shadowing, unused locals, and the bare `except Exception` cases above.
+- No linter or formatter configured. Adding `ruff` (lint + format) would catch
+  unused locals and bare `except Exception` cases elsewhere in the repo.
 - [.github/workflows/tests.yml](.github/workflows/tests.yml) runs only on
   `ubuntu-latest` and a single Python version, yet a large part of the codebase is
   Windows-only (`pywin32`, the taskbar setup, `background`). Add a
@@ -63,5 +47,4 @@ Untested modules: [cases/webs/youtube.py](cases/webs/youtube.py),
 - README has a whole Selenium/geckodriver section, but there are no Selenium scripts
   and `webdriver-manager` is not a dependency.
 - README clone URL is still the placeholder `https://github.com/youruser/BoringStuff.git`.
-- [cases/README.md](cases/README.md) does not document `openwebs` config or the
-  `gitConfig` stub.
+- [cases/README.md](cases/README.md) does not document the `gitConfig` stub.
