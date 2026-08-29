@@ -55,13 +55,22 @@ def generate_icon():
     img.save(ICON_PATH, sizes=[(16, 16), (32, 32), (48, 48), (256, 256)])
 
 
-def make_link(bat_name):
+def make_link(bat_name, description=None):
     link = pythoncom.CoCreateInstance(shell.CLSID_ShellLink, None, pythoncom.CLSCTX_INPROC_SERVER, shell.IID_IShellLinkW)
     link.SetPath(CMD_EXE)
     link.SetArguments(f'/c "{TASKBAR_DIR / bat_name}"')
     link.SetIconLocation(str(ICON_PATH), 0)
     link.SetWorkingDirectory(str(REPO_ROOT))
+    if description:
+        # Shown as the hover tooltip in Explorer/the taskbar Jump List.
+        link.SetDescription(description)
     return link
+
+
+def command_name(bat_name):
+    """"run_background.bat" -> "background" - the actual CLI command a
+    task's .bat file runs, for use as its Jump List hover tooltip. """
+    return bat_name.removeprefix("run_").removesuffix(".bat")
 
 
 def set_title(link, title):
@@ -84,7 +93,7 @@ def create_main_shortcut():
 def register_jump_list():
     collection = pythoncom.CoCreateInstance(shell.CLSID_EnumerableObjectCollection, None, pythoncom.CLSCTX_INPROC_SERVER, shell.IID_IObjectCollection)
     for title, bat_name in TASKS:
-        task_link = make_link(bat_name)
+        task_link = make_link(bat_name, description=command_name(bat_name))
         set_title(task_link, title)
         collection.AddObject(task_link)
 
