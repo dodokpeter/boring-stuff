@@ -3,7 +3,7 @@ from core.configuration.user_conf import create_config_path, load_config, save_c
 
 
 def main():
-    print('--- 🛠️ BoringStuff Initializer ---')
+    print('--- BoringStuff Initializer ---')
 
     name = input('What is your name? ')
     surname = input('What is your surname? ')
@@ -22,7 +22,7 @@ def main():
 
     save_config(None, config)
 
-    print(f'\n✅ Success! Nice to meet you, {name}.')
+    print(f'\nSuccess! Nice to meet you, {name}.')
     print(f'Values saved to: {create_config_path(None)}')
     if age_number is not None:
         print(f'Next year you will be {age_number + 1}!')

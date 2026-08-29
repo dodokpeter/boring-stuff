@@ -14,11 +14,6 @@ Running list of things discussed but not yet done. Remove an item once it's buil
 - `pr` command - branch + push + open a PR in one go, now that `gh` CLI is installed and authenticated
 - finish [cases/git/gitConfig.py](cases/git/gitConfig.py) - currently just a `# todo` stub for per-repo git config management
 
-## Known bugs/gaps
-
-- `scripts/hello.py` throws `UnicodeEncodeError` on this console's codepage (emoji in a `print`)
-- `mapit.py`/`negative.py` lack basic error handling (empty clipboard, non-image files in a directory)
-
 ---
 
 # Repository analysis (2026-08-29)
@@ -28,16 +23,15 @@ Grouped roughly by payoff; each item names the file it applies to.
 
 ## Robustness / UX
 
-- [cases/pictures/negative.py](cases/pictures/negative.py) - no filtering of
-  non-image files (any stray file raises), string path concatenation instead of
-  `pathlib`, output written next to the input so a second run inverts its own
-  `negative*.png` output, and `ImageOps.invert` fails on RGBA/palette PNGs.
+- [cases/pictures/negative.py](cases/pictures/negative.py) - string path
+  concatenation instead of `pathlib`, output written next to the input so a
+  second run inverts its own `negative*.png` output, and `ImageOps.invert`
+  fails on RGBA/palette PNGs.
 - [cases/maps/mapit.py](cases/maps/mapit.py) - uses a bare Tkinter root for the
   clipboard (never withdrawn or destroyed, flashes a window) while `pyperclip` is
-  already a dependency; empty clipboard is unhandled.
-- Emoji in `print` statements ([scripts/hello.py](scripts/hello.py),
-  [cases/webs/youtube.py](cases/webs/youtube.py), `setup.ps1`) raise
-  `UnicodeEncodeError` on a legacy Windows console codepage.
+  already a dependency.
+- Emoji in `print` statements ([cases/webs/youtube.py](cases/webs/youtube.py),
+  `setup.ps1`) raise `UnicodeEncodeError` on a legacy Windows console codepage.
 - [cases/webs/openwebs.py](cases/webs/openwebs.py) - the site list is hardcoded and
   shadows the builtin `all`; the groups belong in user config.
 - No script prints a `--version` or supports `-h` consistently (the argparse-based
