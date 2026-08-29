@@ -109,10 +109,10 @@ Run command:
 
     pinterest
 
-Configuration (in userHome/BoringStuff.ini):
+Configuration (in `~/.boring-stuff/BoringStuff.yml`):
 
-    [Pinterest]
-    RandomBoard: https://pinterest.com/username/board.rss
+    pinterest:
+      randomBoard: https://pinterest.com/username/board.rss
 
 #### Youtube
 Download youtube video.
@@ -149,4 +149,6 @@ Run command:
 
     hello
 
-to ensure that scrips can be run from CMD.
+to ensure that scrips can be run from CMD. Also saves your name/surname/age
+into `~/.boring-stuff/BoringStuff.yml` - the same config file every other
+script reads from.
