@@ -8,7 +8,7 @@ hand every time.
 ## Add Boring Stuff to Taskbar in windows
 A pinned taskbar shortcut ("B" icon): left-click runs `clipsave`, right-click
 shows a Jump List menu with `b64d`/`b64e`. Each opens a terminal window that
-shows the result and closes itself after 60 seconds (or on any keypress).
+shows the result and closes itself after 60 seconds.
 
 One-time setup:
 
