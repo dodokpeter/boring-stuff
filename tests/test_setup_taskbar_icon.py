@@ -38,6 +38,19 @@ def test_make_link_targets_cmd_with_the_right_bat_and_workdir():
     assert link.GetWorkingDirectory() == str(setup_taskbar_icon.REPO_ROOT)
 
 
+def test_make_link_sets_description_as_hover_tooltip():
+    setup_taskbar_icon.generate_icon()
+    link = setup_taskbar_icon.make_link("run_background.bat", description="background")
+
+    assert link.GetDescription() == "background"
+
+
+def test_command_name_strips_run_prefix_and_bat_suffix():
+    assert setup_taskbar_icon.command_name("run_background.bat") == "background"
+    assert setup_taskbar_icon.command_name("run_b64d.bat") == "b64d"
+    assert setup_taskbar_icon.command_name("run_b64e.bat") == "b64e"
+
+
 def test_create_main_shortcut_writes_lnk_with_app_id():
     import win32com.propsys.propsys as propsys
     import win32com.propsys.pscon as pscon
