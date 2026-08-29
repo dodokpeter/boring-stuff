@@ -150,13 +150,16 @@ could be saved.
 
 #### Background
 Set your desktop background to a random picture from a configured folder, or
-to a solid color from a standard 12-color palette (red, orange, yellow,
-green, cyan, blue, purple, pink, brown, black, white, gray).
+to a solid color. A color name is first tried against a standard 12-color
+palette (red, orange, yellow, green, cyan, blue, purple, pink, brown, black,
+white, gray); if that doesn't match, it falls back to CSS3/X11 color names
+(e.g. `light blue`, `steelblue`), so most everyday color names work.
 
 Run command:
 
     background
     background green
+    background light blue
 
 Configuration (in `~/.boring-stuff/BoringStuff.yml`), only needed for the
 random-picture form:

@@ -1,7 +1,9 @@
 #! python3
 # Set the desktop background:
 #   background          - a random picture from a configured directory
-#   background <color>  - a solid color, matched against a standard palette
+#   background <color>  - a solid color: first tried against a standard
+#                          12-color palette, then against CSS3/X11 color
+#                          names (e.g. "light blue", "steelblue")
 #
 # Configuration (in ~/.boring-stuff/BoringStuff.yml):
 #   wallpaper:
@@ -11,8 +13,11 @@ import argparse
 import ctypes
 import os
 import random
+import re
 import struct
 import winreg
+
+from PIL import ImageColor
 
 from core.configuration.user_conf import load_config
 
@@ -39,6 +44,23 @@ COLOR_PALETTE = {
     "white": "255 255 255",
     "gray": "128 128 128",
 }
+
+
+def resolve_color(name):
+    """Look up a color name's "R G B" registry value: first against the
+    standard palette, then falling back to CSS3/X11 color names (spaces,
+    dashes and underscores are stripped, so "light blue" matches
+    "lightblue"). Returns None if neither matches. """
+    normalized = name.strip().lower()
+    if normalized in COLOR_PALETTE:
+        return COLOR_PALETTE[normalized]
+
+    css_name = re.sub(r"[\s_-]", "", normalized)
+    try:
+        r, g, b = ImageColor.getrgb(css_name)
+    except ValueError:
+        return None
+    return f"{r} {g} {b}"
 
 
 def is_64_windows():
@@ -90,17 +112,24 @@ def set_random_picture_background(directory):
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Set the desktop background")
     parser.add_argument(
-        "color", nargs="?",
-        help=f"solid color instead of a random picture, one of: {', '.join(sorted(COLOR_PALETTE))}",
+        "color", nargs="*",
+        help=(
+            "solid color instead of a random picture (e.g. 'green' or 'light blue'). "
+            f"Tries the standard palette first ({', '.join(sorted(COLOR_PALETTE))}); "
+            "if that doesn't match, falls back to CSS3/X11 color names."
+        ),
     )
     args = parser.parse_args(argv)
 
-    if args.color is not None:
-        color = args.color.lower()
-        rgb = COLOR_PALETTE.get(color)
+    if args.color:
+        color_input = " ".join(args.color)
+        rgb = resolve_color(color_input)
         if rgb is None:
-            parser.error(f"unknown color '{args.color}' - choose one of: {', '.join(sorted(COLOR_PALETTE))}")
-        print(color)
+            parser.error(
+                f"unknown color '{color_input}' - not in the standard palette "
+                f"({', '.join(sorted(COLOR_PALETTE))}) or a CSS3/X11 color name"
+            )
+        print(color_input.lower())
         set_solid_color_background(rgb)
         return
 
