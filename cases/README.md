@@ -35,6 +35,18 @@ Run command:
 If the clipboard isn't valid base64 (for `b64d`), or is empty, prints a
 message and exits non-zero without touching the clipboard.
 
+#### Json-pretty
+Pretty-print (or minify) the clipboard's JSON text, in place - result goes
+straight back onto the clipboard, no files.
+
+Run command:
+
+    json-pretty            (pretty-print, 2-space indent)
+    json-pretty --minify   (minify)
+
+If the clipboard isn't valid JSON, or is empty, prints a message and exits
+non-zero without touching the clipboard.
+
 #### Prune-branches
 Delete branches already merged into origin's default branch (master/main).
 Run from inside whichever repo you want to clean up - not specific to
