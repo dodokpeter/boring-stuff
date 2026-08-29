@@ -19,10 +19,6 @@ Running list of things discussed but not yet done. Remove an item once it's buil
 - `scripts/hello.py` throws `UnicodeEncodeError` on this console's codepage (emoji in a `print`)
 - `mapit.py`/`negative.py` lack basic error handling (empty clipboard, non-image files in a directory)
 
-## Environment/admin
-
-- Optional: branch protection on `master` requiring the CI "test" check to pass before merge
-
 ---
 
 # Repository analysis (2026-08-29)
