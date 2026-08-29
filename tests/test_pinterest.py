@@ -1,13 +1,11 @@
 from cases.webs import pinterest
 
 
-def test_opens_random_picture_link(tmp_path, monkeypatch):
-    ini = tmp_path / "BoringStuff.ini"
-    ini.write_text(
-        "[Pinterest]\nRandomBoard: https://example.com/board.rss\n",
-        encoding="utf-8",
+def test_opens_random_picture_link(monkeypatch):
+    monkeypatch.setattr(
+        pinterest, "load_config",
+        lambda name: {"pinterest": {"randomBoard": "https://example.com/board.rss"}},
     )
-    monkeypatch.setattr(pinterest.Path, "home", lambda: tmp_path)
 
     # Two <item> entries so xmltodict parses a list (a single <item> would
     # parse as a plain dict instead, which the script doesn't handle).
@@ -30,3 +28,13 @@ def test_opens_random_picture_link(tmp_path, monkeypatch):
     pinterest.main()
 
     assert opened == ["https://example.com/a.jpg"]
+
+
+def test_raises_when_board_not_configured(monkeypatch):
+    monkeypatch.setattr(pinterest, "load_config", lambda name: {})
+
+    try:
+        pinterest.main()
+        assert False, "expected a KeyError for missing config"
+    except KeyError:
+        pass

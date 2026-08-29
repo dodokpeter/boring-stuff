@@ -41,12 +41,6 @@ Grouped roughly by payoff; each item names the file it applies to.
   thing. The test only covers the two-item case (and says so in a comment).
 - [scripts/hello.py](scripts/hello.py) - `int(age) + 1` in the final print is outside
   the `try`, so a non-numeric age is accepted earlier and then crashes at the end.
-- [core/configuration/user_conf.py](core/configuration/user_conf.py) - reads
-  `os.environ['HOME']` at import time; `HOME` is not set on stock Windows, so the
-  module raises `KeyError` on import. Use `Path.home()`.
-- [core/configuration/user_conf.py](core/configuration/user_conf.py) -
-  `load_config_value` returns `None` when the key already exists (falls off the end
-  of the function without returning `value`).
 - [cases/wins/setBackgroundPicture.py](cases/wins/setBackgroundPicture.py) - all logic
   runs at import time, the `sys.argv` check demands an argument that is then never
   used, and `DIR_PATH` is hardcoded to `c:\repositories\_backgroundPics\`.
@@ -70,22 +64,16 @@ Grouped roughly by payoff; each item names the file it applies to.
 - `clean-logs` in `[project.scripts]` points at `scripts.cleanup:run`, which does not
   exist (`scripts/` contains only `hello.py`) - already tracked above, still open.
 
-## Config sprawl
-
-Three different config mechanisms coexist for one small toolset:
-
-- `~/boring-stuff/BoringStuff.yml` ([scripts/hello.py](scripts/hello.py), `setup.ps1`)
-- `~/.boring-stuff/*.yml` ([core/configuration/user_conf.py](core/configuration/user_conf.py))
-- `~/BoringStuff.ini` ([cases/webs/pinterest.py](cases/webs/pinterest.py))
-
-Pick one location and format (YAML under `~/.boring-stuff/` is the closest to a
-convention here) and route every script through a single loader.
-
 ## Dead / unfinished code
 
-- [core/](core/) is entirely unused - nothing under `cases/` or `scripts/` imports it;
-  the only importers are other `core` modules. Either wire it in (it is the natural
-  home for the unified config loader above) or delete it.
+- [core/console/saving.py](core/console/saving.py) and
+  [core/python/version.py](core/python/version.py) are still unused - nothing
+  outside `core/` imports them. `core/configuration/user_conf.py` and
+  `core/console/inputs.py` are the exception: now wired into
+  [scripts/hello.py](scripts/hello.py) and
+  [cases/webs/pinterest.py](cases/webs/pinterest.py) as the single shared config
+  loader (config sprawl fix - was three different mechanisms, now one:
+  `~/.boring-stuff/BoringStuff.yml`).
 - [cases/webs/small.py](cases/webs/small.py) - a comment and nothing else.
 - [cases/git/gitConfig.py](cases/git/gitConfig.py) - `# todo` stub.
 - [cases/webs/mp4to3.py](cases/webs/mp4to3.py) - roughly half the body is leftover
@@ -126,7 +114,8 @@ convention here) and route every script through a single loader.
 ## Test gaps
 
 Untested modules: [cases/webs/youtube.py](cases/webs/youtube.py),
-[scripts/hello.py](scripts/hello.py), [core/](core/),
+[core/console/saving.py](core/console/saving.py),
+[core/python/version.py](core/python/version.py),
 [cases/wins/setBackgroundPicture.py](cases/wins/setBackgroundPicture.py),
 [cases/git/gitConfig.py](cases/git/gitConfig.py). The pinterest test does not cover
 the single-item feed or an out-of-range index (both real bugs listed above).

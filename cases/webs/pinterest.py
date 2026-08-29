@@ -5,17 +5,15 @@ import requests
 import random
 import xmltodict
 import webbrowser
-import configparser
-from pathlib import Path
+
+from core.configuration.user_conf import load_config
 
 
 def main():
-    home = str(Path.home())
-    Config = configparser.ConfigParser()
-    Config.read(str(Path(home) / 'BoringStuff.ini'))
+    config = load_config(None)
 
     #obtain url of pinterest board
-    url = Config.get('Pinterest','RandomBoard')
+    url = config['pinterest']['randomBoard']
     response = requests.get(url, "xml")
     response.raise_for_status()
 
@@ -29,4 +27,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

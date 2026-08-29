@@ -2,7 +2,7 @@
 Write-Host "🚀 Initializing BoringStuff with uv..." -ForegroundColor Cyan
 
 $repoPath = Get-Location
-$configDest = Join-Path $HOME "boring-stuff"
+$configDest = Join-Path $HOME ".boring-stuff"
 
 # 1. Sync Dependencies
 Write-Host "Installing dependencies..." -ForegroundColor Yellow
@@ -21,8 +21,9 @@ if (-not (Test-Path $configDest)) {
 }
 
 $configFile = Join-Path $repoPath "BoringStuff.yml"
-if (Test-Path $configFile) {
-    Copy-Item $configFile (Join-Path $configDest "BoringStuff.yml") -Force
+$configDestFile = Join-Path $configDest "BoringStuff.yml"
+if ((Test-Path $configFile) -and (-not (Test-Path $configDestFile))) {
+    Copy-Item $configFile $configDestFile
     Write-Host "✅ Configuration ready!"
 }
 
