@@ -1,0 +1,68 @@
+import pytest
+
+pytest.importorskip("win32com.shell.shell")
+
+from PIL import Image
+
+from devs.taskbar import setup_taskbar_icon
+
+
+@pytest.fixture(autouse=True)
+def isolated_paths(tmp_path, monkeypatch):
+    data_dir = tmp_path / ".boring-stuff"
+    monkeypatch.setattr(setup_taskbar_icon, "DATA_DIR", data_dir)
+    monkeypatch.setattr(setup_taskbar_icon, "ICON_PATH", data_dir / "boring.ico")
+    monkeypatch.setattr(setup_taskbar_icon, "SHORTCUT_PATH", data_dir / "Boring.lnk")
+    # Never touch the real "BoringStuff.Launcher" app id - that's the one
+    # registered against the user's actual pinned taskbar icon.
+    monkeypatch.setattr(setup_taskbar_icon, "APP_ID", "BoringStuff.Test")
+    return data_dir
+
+
+def test_generate_icon_creates_multi_size_ico():
+    setup_taskbar_icon.generate_icon()
+
+    icon_path = setup_taskbar_icon.ICON_PATH
+    assert icon_path.exists()
+    with Image.open(icon_path) as img:
+        assert set(img.info.get("sizes", [])) >= {(16, 16), (32, 32), (48, 48), (256, 256)}
+
+
+def test_make_link_targets_cmd_with_the_right_bat_and_workdir():
+    setup_taskbar_icon.generate_icon()
+    link = setup_taskbar_icon.make_link("run_b64d.bat")
+
+    path, _find_data = link.GetPath(0)
+    assert path.lower() == setup_taskbar_icon.CMD_EXE.lower()
+    assert "run_b64d.bat" in link.GetArguments()
+    assert link.GetWorkingDirectory() == str(setup_taskbar_icon.REPO_ROOT)
+
+
+def test_create_main_shortcut_writes_lnk_with_app_id():
+    import win32com.propsys.propsys as propsys
+    import win32com.propsys.pscon as pscon
+    import win32com.shell.shellcon as shellcon
+
+    setup_taskbar_icon.generate_icon()
+    setup_taskbar_icon.create_main_shortcut()
+
+    shortcut_path = setup_taskbar_icon.SHORTCUT_PATH
+    assert shortcut_path.exists()
+
+    store = propsys.SHGetPropertyStoreFromParsingName(
+        str(shortcut_path), None, shellcon.GPS_DEFAULT, propsys.IID_IPropertyStore
+    )
+    app_id = store.GetValue(pscon.PKEY_AppUserModel_ID).GetValue()
+    assert app_id == "BoringStuff.Test"
+
+
+def test_register_jump_list_runs_without_error():
+    # Exercises the real ICustomDestinationList COM calls, isolated under
+    # the "BoringStuff.Test" app id from the fixture above - this cannot
+    # affect the real pinned icon's Jump List. There's no supported way to
+    # read a Jump List's registered tasks back via COM to assert against,
+    # so this is a smoke test: it passes if no COM error is raised.
+    setup_taskbar_icon.generate_icon()
+    setup_taskbar_icon.create_main_shortcut()
+
+    setup_taskbar_icon.register_jump_list()
