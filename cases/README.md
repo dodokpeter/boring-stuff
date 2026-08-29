@@ -35,19 +35,25 @@ If the clipboard isn't valid base64 (for `b64d`), or is empty, prints a
 message and exits non-zero without touching the clipboard.
 
 #### Prune-branches
-Delete local git branches already merged into origin's default branch
-(master/main). Run from inside whichever repo you want to clean up - not
-specific to boring-stuff.
+Delete branches already merged into origin's default branch (master/main).
+Run from inside whichever repo you want to clean up - not specific to
+boring-stuff.
 
 Run command:
 
-    prune-branches         (dry run - lists what would be deleted)
-    prune-branches --yes   (actually deletes them)
+    prune-branches                    (local, dry run - lists what would be deleted)
+    prune-branches --yes              (local, actually deletes them)
+    prune-branches --remote           (origin, dry run)
+    prune-branches --remote --yes     (origin, actually deletes them)
 
-Fetches from origin first so the merged-status check reflects branches
-merged remotely (e.g. via a squash-merged PR), even if your local default
-branch hasn't been updated yet. Only deletes branches git itself considers
-safe to delete (`git branch -d`, not `-D`).
+Fetches from origin first (with `--prune`, so stale remote-tracking refs
+don't linger) so the merged-status check reflects branches merged remotely
+(e.g. via a squash-merged PR), even if your local default branch hasn't
+been updated yet. Local deletion only removes branches git itself considers
+safe to delete (`git branch -d`, not `-D`); `--remote` deletes branches on
+origin via `git push origin --delete` - only ever branches already
+confirmed merged, but a real, visible-to-everyone deletion, so double-check
+the dry-run list first.
 
 ### cases/maps
 

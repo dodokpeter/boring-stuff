@@ -80,3 +80,68 @@ def test_reports_when_nothing_to_prune(repo, monkeypatch, capsys):
 
     out = capsys.readouterr().out
     assert "No local branches to prune" in out
+
+
+def make_merged_remote_branch(repo, name):
+    git("checkout", "-b", name, cwd=repo)
+    (repo / f"{name}.txt").write_text(name, encoding="utf-8")
+    git("add", f"{name}.txt", cwd=repo)
+    git("commit", "-m", name, cwd=repo)
+    git("push", "-u", "origin", name, cwd=repo)
+    git("checkout", "master", cwd=repo)
+    git("merge", "--no-ff", "-m", f"merge {name}", name, cwd=repo)
+    git("push", "origin", "master", cwd=repo)
+
+
+def remote_branch_names(remote_path):
+    output = subprocess.run(
+        ["git", "ls-remote", "--heads", str(remote_path)],
+        capture_output=True, text=True, check=True,
+    ).stdout
+    return {line.rsplit("refs/heads/", 1)[-1] for line in output.splitlines() if line.strip()}
+
+
+def test_remote_dry_run_lists_but_does_not_delete(repo, monkeypatch, capsys):
+    remote = repo.parent / "remote.git"
+    make_merged_remote_branch(repo, "feature-x")
+
+    monkeypatch.chdir(repo)
+    prune_branches.main(["--remote"])
+
+    assert "feature-x" in remote_branch_names(remote)
+    out = capsys.readouterr().out
+    assert "feature-x" in out
+    assert "Dry run" in out
+
+
+def test_remote_yes_deletes_merged_remote_branch(repo, monkeypatch):
+    remote = repo.parent / "remote.git"
+    make_merged_remote_branch(repo, "feature-y")
+
+    monkeypatch.chdir(repo)
+    prune_branches.main(["--remote", "--yes"])
+
+    assert "feature-y" not in remote_branch_names(remote)
+
+
+def test_remote_does_not_delete_unmerged_remote_branch(repo, monkeypatch):
+    remote = repo.parent / "remote.git"
+    git("checkout", "-b", "feature-z", cwd=repo)
+    (repo / "feature-z.txt").write_text("z", encoding="utf-8")
+    git("add", "feature-z.txt", cwd=repo)
+    git("commit", "-m", "feature-z", cwd=repo)
+    git("push", "-u", "origin", "feature-z", cwd=repo)
+    git("checkout", "master", cwd=repo)
+
+    monkeypatch.chdir(repo)
+    prune_branches.main(["--remote", "--yes"])
+
+    assert "feature-z" in remote_branch_names(remote)
+
+
+def test_remote_reports_when_nothing_to_prune(repo, monkeypatch, capsys):
+    monkeypatch.chdir(repo)
+    prune_branches.main(["--remote"])
+
+    out = capsys.readouterr().out
+    assert "No remote branches to prune" in out
