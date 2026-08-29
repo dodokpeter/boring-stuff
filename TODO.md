@@ -16,7 +16,6 @@ Running list of things discussed but not yet done. Remove an item once it's buil
 
 ## Known bugs/gaps
 
-- `clean-logs` console script in `pyproject.toml` points to `scripts.cleanup:run`, which doesn't exist - crashes if run
 - `scripts/hello.py` throws `UnicodeEncodeError` on this console's codepage (emoji in a `print`)
 - `mapit.py`/`negative.py` lack basic error handling (empty clipboard, non-image files in a directory)
 
@@ -46,21 +45,6 @@ Grouped roughly by payoff; each item names the file it applies to.
   used, and `DIR_PATH` is hardcoded to `c:\repositories\_backgroundPics\`.
 - [cases/maps/mapit.py](cases/maps/mapit.py) - address is not URL-encoded, so
   addresses with `&`, `#` or `+` build a broken Maps URL.
-
-## Dependency and packaging
-
-- `requests` is imported by [cases/webs/pinterest.py](cases/webs/pinterest.py) but not
-  declared in `pyproject.toml` - it only resolves as a transitive dependency of
-  `googlesearch-python`. Declare it explicitly.
-- `pyproject.toml` has no `requires-python`; `uv` warns and defaults to `>=3.12` on
-  every run. Add `requires-python = ">=3.12"`.
-- `[tool.setuptools] packages = []` / `py-modules = []` means `cases` and `core` are
-  never packaged. The console scripts only work because of the editable install plus
-  the `sys.path` hack in [conftest.py](conftest.py); a normal (non-editable) install
-  would produce entry points that fail to import. Either declare the packages
-  properly or document that editable-only is intentional.
-- `clean-logs` in `[project.scripts]` points at `scripts.cleanup:run`, which does not
-  exist (`scripts/` contains only `hello.py`) - already tracked above, still open.
 
 ## Robustness / UX
 

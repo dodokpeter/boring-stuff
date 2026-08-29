@@ -27,6 +27,7 @@ dependencies = [
     { name = "pywin32", marker = "sys_platform == 'win32'" },
     { name = "pyyaml" },
     { name = "quickjs" },
+    { name = "requests" },
     { name = "xmltodict" },
     { name = "yt-dlp" },
 ]
@@ -45,6 +46,7 @@ requires-dist = [
     { name = "pywin32", marker = "sys_platform == 'win32'", specifier = ">=312" },
     { name = "pyyaml" },
     { name = "quickjs", specifier = ">=1.19.4" },
+    { name = "requests", specifier = ">=2.34.2" },
     { name = "xmltodict", specifier = ">=1.0.4" },
     { name = "yt-dlp", extras = ["build-in-js-interpreter", "javascript"], specifier = ">=2026.3.17" },
 ]
