@@ -4,6 +4,7 @@
 # mp4to3 [folder]
 
 import codecs
+import subprocess
 import sys
 import pathlib
 from pathlib import Path
@@ -11,8 +12,12 @@ from pathlib import Path
 # ffmpeg on system path
 # download ffmpeg: https://www.gyan.dev/ffmpeg/builds/
 # https://video.stackexchange.com/questions/20495/how-do-i-set-up-and-use-ffmpeg-in-windows
-import yt_dlp as youtube_dl
-from audio_extract import extract_audio
+
+
+def extract_audio(input_path, output_path):
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(["ffmpeg", "-i", str(input_path), "-y", str(output_path)], check=True)
+
 
 def main():
     # Compatibility fixes for Windows
