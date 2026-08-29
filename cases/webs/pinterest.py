@@ -19,8 +19,11 @@ def main():
 
     #xml response parse it
     doc = xmltodict.parse(response.content)
-    size = len(doc['rss']['channel']['item'])
-    picture = doc['rss']['channel']['item'][random.randint(0, size)]
+    items = doc['rss']['channel']['item']
+    if isinstance(items, dict):
+        # xmltodict parses a single <item> as a dict rather than a list
+        items = [items]
+    picture = random.choice(items)
     print(picture)
     webbrowser.open(picture['link'])
 

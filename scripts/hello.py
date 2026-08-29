@@ -13,8 +13,10 @@ def main():
     config.setdefault('me', {})
     config['me']['name'] = name
     config['me']['surname'] = surname
+    age_number = None
     try:
-        config['me']['age'] = int(age)
+        age_number = int(age)
+        config['me']['age'] = age_number
     except ValueError:
         config['me']['age'] = age  # Keep as string if not a number
 
@@ -22,7 +24,8 @@ def main():
 
     print(f'\n✅ Success! Nice to meet you, {name}.')
     print(f'Values saved to: {create_config_path(None)}')
-    print(f'Next year you will be {int(age) + 1}!')
+    if age_number is not None:
+        print(f'Next year you will be {age_number + 1}!')
 
 
 if __name__ == "__main__":
