@@ -9,6 +9,7 @@ dependencies = [
     "googlesearch-python>=1.3.0",
     "pillow>=12.3.0",
     "pyperclip>=1.11.0",
+    "pywin32>=312; sys_platform == 'win32'",
 ]
 
 [project.scripts]
@@ -19,10 +20,14 @@ yt = "scripts.webs.youtube:main"
 clipsave = "wins.clipsave:main"
 b64d = "devs.base64_clip:main_decode"
 b64e = "devs.base64_clip:main_encode"
+prune-branches = "devs.prune_branches:main"
 
 [tool.setuptools]
 packages = []  # Tells it not to look for library packages
 py-modules = [] # Tells it not to look for top-level modules
+
+[tool.uv]
+package = true
 
 [dependency-groups]
 dev = [
