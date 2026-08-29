@@ -56,7 +56,9 @@ def save_clipboard_files(paths, downloads, timestamp):
         if source.is_dir():
             target_zip = unique_path(downloads / f"{timestamp} {source.name}.zip")
             archive_base = target_zip.with_suffix("")
-            archive_path = Path(shutil.make_archive(str(archive_base), "zip", root_dir=source.parent, base_dir=source.name))
+            archive_path = Path(
+                shutil.make_archive(str(archive_base), "zip", root_dir=source.parent, base_dir=source.name)
+            )
             report_saved("Zipped folder", archive_path)
         else:
             dest = unique_path(downloads / f"{timestamp} {source.name}")

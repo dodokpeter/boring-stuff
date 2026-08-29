@@ -43,7 +43,8 @@ def test_multiple_tags_open_each_group(monkeypatch):
 def test_user_config_fully_replaces_default_groups(monkeypatch):
     opened = []
     monkeypatch.setattr(
-        openwebs, "load_config",
+        openwebs,
+        "load_config",
         lambda name: {"openwebs": {"work": ["https://example.com/inbox", "https://example.com/tickets"]}},
     )
     monkeypatch.setattr(openwebs.webbrowser, "open", lambda url: opened.append(url))

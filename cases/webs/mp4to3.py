@@ -26,11 +26,11 @@ def main(argv=None):
     print(f"<<<{folder}>>>")
 
     source_dir = Path(folder)
-    files = source_dir.glob('*.mp4')
+    files = source_dir.glob("*.mp4")
     for file in files:
         print(file.name)
-        filename = file.name.replace('.mp4', '.mp3')
-        audio_dir = Path(folder + ' - audio')
+        filename = file.name.replace(".mp4", ".mp3")
+        audio_dir = Path(folder + " - audio")
         extract_audio(input_path=file, output_path=str(audio_dir / filename))
 
 

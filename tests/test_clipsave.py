@@ -78,6 +78,7 @@ def test_zips_a_folder_from_clipboard(tmp_path, monkeypatch, isolated_downloads)
     archive = isolated_downloads / "2026-08-28 09-45-50 project.zip"
     assert archive.exists()
     import zipfile
+
     with zipfile.ZipFile(archive) as zf:
         names = set(zf.namelist())
     assert "project/a.txt" in names

@@ -25,7 +25,7 @@ def main(argv=None):
     urls = []
     try:
         urls = list(search(query, num_results=args.count))
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - scraping can fail in many ways; any of them should fall back, not crash
         print(f"Scraping failed ({e}), falling back to search results page.")
 
     if not urls:

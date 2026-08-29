@@ -18,10 +18,13 @@ def main(argv=None):
     address = " ".join(args.address) if args.address else (pyperclip.paste() or "")
     address = address.strip()
     if not address:
-        print("No address given and the clipboard is empty. Pass an address as an argument instead, e.g. `mapit Bratislava`.")
+        print(
+            "No address given and the clipboard is empty. "
+            "Pass an address as an argument instead, e.g. `mapit Bratislava`."
+        )
         return
 
-    webbrowser.open('https://www.google.com/maps/place/' + quote(address))
+    webbrowser.open("https://www.google.com/maps/place/" + quote(address))
 
 
 if __name__ == "__main__":

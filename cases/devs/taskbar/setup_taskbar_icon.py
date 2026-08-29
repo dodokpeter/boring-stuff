@@ -56,7 +56,9 @@ def generate_icon():
 
 
 def make_link(bat_name, description=None):
-    link = pythoncom.CoCreateInstance(shell.CLSID_ShellLink, None, pythoncom.CLSCTX_INPROC_SERVER, shell.IID_IShellLinkW)
+    link = pythoncom.CoCreateInstance(
+        shell.CLSID_ShellLink, None, pythoncom.CLSCTX_INPROC_SERVER, shell.IID_IShellLinkW
+    )
     link.SetPath(CMD_EXE)
     link.SetArguments(f'/c "{TASKBAR_DIR / bat_name}"')
     link.SetIconLocation(str(ICON_PATH), 0)
@@ -68,8 +70,8 @@ def make_link(bat_name, description=None):
 
 
 def command_name(bat_name):
-    """"run_background.bat" -> "background" - the actual CLI command a
-    task's .bat file runs, for use as its Jump List hover tooltip. """
+    """ "run_background.bat" -> "background" - the actual CLI command a
+    task's .bat file runs, for use as its Jump List hover tooltip."""
     return bat_name.removeprefix("run_").removesuffix(".bat")
 
 
@@ -85,19 +87,25 @@ def create_main_shortcut():
     persist = link.QueryInterface(pythoncom.IID_IPersistFile)
     persist.Save(str(SHORTCUT_PATH), True)
 
-    store = propsys.SHGetPropertyStoreFromParsingName(str(SHORTCUT_PATH), None, shellcon.GPS_READWRITE, propsys.IID_IPropertyStore)
+    store = propsys.SHGetPropertyStoreFromParsingName(
+        str(SHORTCUT_PATH), None, shellcon.GPS_READWRITE, propsys.IID_IPropertyStore
+    )
     store.SetValue(pscon.PKEY_AppUserModel_ID, propsys.PROPVARIANTType(APP_ID))
     store.Commit()
 
 
 def register_jump_list():
-    collection = pythoncom.CoCreateInstance(shell.CLSID_EnumerableObjectCollection, None, pythoncom.CLSCTX_INPROC_SERVER, shell.IID_IObjectCollection)
+    collection = pythoncom.CoCreateInstance(
+        shell.CLSID_EnumerableObjectCollection, None, pythoncom.CLSCTX_INPROC_SERVER, shell.IID_IObjectCollection
+    )
     for title, bat_name in TASKS:
         task_link = make_link(bat_name, description=command_name(bat_name))
         set_title(task_link, title)
         collection.AddObject(task_link)
 
-    dest_list = pythoncom.CoCreateInstance(shell.CLSID_DestinationList, None, pythoncom.CLSCTX_INPROC_SERVER, shell.IID_ICustomDestinationList)
+    dest_list = pythoncom.CoCreateInstance(
+        shell.CLSID_DestinationList, None, pythoncom.CLSCTX_INPROC_SERVER, shell.IID_ICustomDestinationList
+    )
     dest_list.SetAppID(APP_ID)
     dest_list.BeginList()
     dest_list.AddUserTasks(collection.QueryInterface(shell.IID_IObjectArray))

@@ -96,7 +96,9 @@ def make_merged_remote_branch(repo, name):
 def remote_branch_names(remote_path):
     output = subprocess.run(
         ["git", "ls-remote", "--heads", str(remote_path)],
-        capture_output=True, text=True, check=True,
+        capture_output=True,
+        text=True,
+        check=True,
     ).stdout
     return {line.rsplit("refs/heads/", 1)[-1] for line in output.splitlines() if line.strip()}
 

@@ -30,7 +30,8 @@ def test_default_count_is_four(monkeypatch):
 def test_n_flag_sets_result_count(monkeypatch):
     seen = {}
     monkeypatch.setattr(
-        lucky, "search",
+        lucky,
+        "search",
         lambda term, num_results: seen.setdefault("num_results", num_results) or [],
     )
     monkeypatch.setattr(lucky.webbrowser, "open", lambda url: None)
