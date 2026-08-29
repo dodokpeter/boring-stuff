@@ -1,9 +1,11 @@
 [project]
 name = "boring-stuff"
 version = "0.1.0"
+requires-python = ">=3.12"
 dependencies = [
     "pyyaml",
     "openpyxl",
+    "requests>=2.34.2",
     "yt-dlp[build-in-js-interpreter,javascript]>=2026.3.17",
     "quickjs>=1.19.4",
     "googlesearch-python>=1.3.0",
@@ -15,7 +17,6 @@ dependencies = [
 
 [project.scripts]
 hello = "scripts.hello:main"
-clean-logs = "scripts.cleanup:run"
 youtube = "cases.webs.youtube:main"
 yt = "cases.webs.youtube:main"
 clipsave = "cases.wins.clipsave:main"
@@ -29,9 +30,9 @@ pinterest = "cases.webs.pinterest:main"
 openwebs = "cases.webs.openwebs:main"
 mp4to3 = "cases.webs.mp4to3:main"
 
-[tool.setuptools]
-packages = []  # Tells it not to look for library packages
-py-modules = [] # Tells it not to look for top-level modules
+[tool.setuptools.packages.find]
+include = ["cases*", "core*", "scripts*"]
+namespaces = true
 
 [tool.uv]
 package = true
