@@ -142,6 +142,18 @@ Timestamp format is `YYYY-MM-dd HH-mm-ss` (e.g. `2026-08-28 09-45-50`).
 Prints a message and exits non-zero if the clipboard is empty or nothing
 could be saved.
 
+#### Set-wallpaper
+Set your desktop background to a random picture from a configured folder.
+
+Run command:
+
+    set-wallpaper
+
+Configuration (in `~/.boring-stuff/BoringStuff.yml`):
+
+    wallpaper:
+      directory: C:\Pictures\Wallpapers
+
 ### scripts
 
 #### Hello

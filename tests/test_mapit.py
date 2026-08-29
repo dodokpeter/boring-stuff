@@ -29,3 +29,13 @@ def test_falls_back_to_clipboard_when_no_args(monkeypatch):
     mapit.main()
 
     assert opened == ["https://www.google.com/maps/place/Vienna"]
+
+
+def test_url_encodes_special_characters_in_address(monkeypatch):
+    opened = []
+    monkeypatch.setattr(mapit.webbrowser, "open", lambda url: opened.append(url))
+    monkeypatch.setattr(mapit.sys, "argv", ["mapit", "AT&T", "Building,", "5th", "&", "Main"])
+
+    mapit.main()
+
+    assert opened == ["https://www.google.com/maps/place/AT%26T%20Building%2C%205th%20%26%20Main"]

@@ -1,7 +1,5 @@
 import builtins
 
-import pytest
-
 from core.configuration import user_conf
 from scripts import hello
 
@@ -26,15 +24,13 @@ def test_creates_config_and_saves_answers(tmp_path, monkeypatch, capsys):
     assert "Next year you will be 37" in out
 
 
-def test_crashes_on_non_numeric_age_but_still_saves_config(tmp_path, monkeypatch):
-    # Documents a known, separately-tracked bug (TODO.md): int(age) + 1 in the
-    # final print is outside the try/except, so a non-numeric age is accepted
-    # and saved, then crashes on the last line instead of the earlier
-    # try/except catching it.
+def test_non_numeric_age_saves_as_string_without_crashing(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(user_conf.Path, "home", lambda: tmp_path)
     answer_with(monkeypatch, "Ada", "Lovelace", "not-a-number")
 
-    with pytest.raises(ValueError):
-        hello.main()
+    hello.main()
 
     assert user_conf.load_config(None)["me"]["age"] == "not-a-number"
+    out = capsys.readouterr().out
+    assert "Nice to meet you, Ada" in out
+    assert "Next year" not in out

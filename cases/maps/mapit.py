@@ -6,6 +6,7 @@
 import webbrowser
 import sys
 import tkinter as tk
+from urllib.parse import quote
 
 
 def main():
@@ -16,7 +17,7 @@ def main():
         root = tk.Tk()
         address = root.clipboard_get()
 
-    webbrowser.open('https://www.google.com/maps/place/' + address)
+    webbrowser.open('https://www.google.com/maps/place/' + quote(address))
 
 
 if __name__ == "__main__":

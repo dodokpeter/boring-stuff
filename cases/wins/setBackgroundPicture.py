@@ -1,20 +1,20 @@
-import struct
+#! python3
+# Change desktop background picture to a random one from a configured
+# directory.
+#
+# Configuration (in ~/.boring-stuff/BoringStuff.yml):
+#   wallpaper:
+#     directory: C:\Pictures\Wallpapers
+
 import ctypes
-import os, random
-import sys
+import os
+import random
+import struct
 
-# CHANGE BACKGROUND PICTURE FROM SET OF PICTURE IN THE DIRECTORY
-if len(sys.argv) < 2:
-    print ('Usage: ' + sys.argv[0] + ' <filename>')
-    sys.exit(1)
-
-DIR_PATH = "c:\\repositories\\_backgroundPics\\"
-
-WALLPAPER_PATH =DIR_PATH + random.choice(os.listdir(DIR_PATH))
+from core.configuration.user_conf import load_config
 
 SPI_SETDESKWALLPAPER = 20
 
-print( WALLPAPER_PATH )
 
 def is_64_windows():
     """Find out how many bits is OS. """
@@ -27,15 +27,22 @@ def get_sys_parameters_info():
         else ctypes.windll.user32.SystemParametersInfoA
 
 
-def change_wallpaper():
+def main():
+    config = load_config(None)
+    directory = config['wallpaper']['directory']
+
+    wallpaper_path = os.path.join(directory, random.choice(os.listdir(directory)))
+    print(wallpaper_path)
+
     sys_parameters_info = get_sys_parameters_info()
-    r = sys_parameters_info(SPI_SETDESKWALLPAPER, 0, WALLPAPER_PATH, 3)
+    result = sys_parameters_info(SPI_SETDESKWALLPAPER, 0, wallpaper_path, 3)
 
     # When the SPI_SETDESKWALLPAPER flag is used,
     # SystemParametersInfo returns TRUE
     # unless there is an error (like when the specified file doesn't exist).
-    if not r:
+    if not result:
         print(ctypes.WinError())
 
 
-change_wallpaper()
+if __name__ == "__main__":
+    main()

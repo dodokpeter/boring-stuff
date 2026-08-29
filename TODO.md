@@ -26,22 +26,6 @@ Running list of things discussed but not yet done. Remove an item once it's buil
 Findings from a full read of the repo. Tests currently pass (40/40).
 Grouped roughly by payoff; each item names the file it applies to.
 
-## Correctness bugs
-
-- [cases/webs/pinterest.py](cases/webs/pinterest.py) - `random.randint(0, size)` is
-  inclusive on both ends, so it can index one past the end of the item list and
-  raise `IndexError`. Should be `randint(0, size - 1)` (or `random.choice`).
-- [cases/webs/pinterest.py](cases/webs/pinterest.py) - a feed with a single `<item>`
-  parses as a dict, not a list, so `len(...)` and indexing silently do the wrong
-  thing. The test only covers the two-item case (and says so in a comment).
-- [scripts/hello.py](scripts/hello.py) - `int(age) + 1` in the final print is outside
-  the `try`, so a non-numeric age is accepted earlier and then crashes at the end.
-- [cases/wins/setBackgroundPicture.py](cases/wins/setBackgroundPicture.py) - all logic
-  runs at import time, the `sys.argv` check demands an argument that is then never
-  used, and `DIR_PATH` is hardcoded to `c:\repositories\_backgroundPics\`.
-- [cases/maps/mapit.py](cases/maps/mapit.py) - address is not URL-encoded, so
-  addresses with `&`, `#` or `+` build a broken Maps URL.
-
 ## Robustness / UX
 
 - [cases/pictures/negative.py](cases/pictures/negative.py) - no filtering of
@@ -74,9 +58,7 @@ Grouped roughly by payoff; each item names the file it applies to.
 ## Test gaps
 
 Untested modules: [cases/webs/youtube.py](cases/webs/youtube.py),
-[cases/wins/setBackgroundPicture.py](cases/wins/setBackgroundPicture.py),
-[cases/git/gitConfig.py](cases/git/gitConfig.py). The pinterest test does not cover
-the single-item feed or an out-of-range index (both real bugs listed above).
+[cases/git/gitConfig.py](cases/git/gitConfig.py).
 
 ## Documentation
 
@@ -88,4 +70,4 @@ the single-item feed or an out-of-range index (both real bugs listed above).
   and `webdriver-manager` is not a dependency.
 - README clone URL is still the placeholder `https://github.com/youruser/BoringStuff.git`.
 - [cases/README.md](cases/README.md) does not document `openwebs` config or the
-  `clean-logs`/`gitConfig` stubs.
+  `gitConfig` stub.
