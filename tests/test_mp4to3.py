@@ -19,3 +19,8 @@ def test_extracts_audio_for_each_mp4_in_folder(tmp_path, monkeypatch):
     assert len(calls) == 2
     names = {Path(c[0]).name for c in calls}
     assert names == {"song1.mp4", "song2.mp4"}
+
+    expected_audio_dir = Path(f"{tmp_path} - audio")
+    for _input_path, output_path in calls:
+        assert Path(output_path).parent == expected_audio_dir
+        assert output_path.endswith(".mp3")

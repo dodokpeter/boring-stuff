@@ -45,13 +45,13 @@ def main():
     format = 'mp4'
 
     path_with_album = url_to_convert
-    source_dir = Path(path_with_album + '\\')
+    source_dir = Path(path_with_album)
     files = source_dir.glob('*.mp4')
     for file in files:
         print(file.name)
         filename = file.name.replace('.mp4', '.mp3')
-        audioDir = path_with_album + ' - audio\\'
-        extract_audio(input_path=file, output_path=audioDir + filename)
+        audioDir = Path(path_with_album + ' - audio')
+        extract_audio(input_path=file, output_path=str(audioDir / filename))
 
 
 if __name__ == "__main__":

@@ -12,7 +12,7 @@ from pathlib import Path
 def main():
     home = str(Path.home())
     Config = configparser.ConfigParser()
-    Config.read(home + '\\BoringStuff.ini')
+    Config.read(str(Path(home) / 'BoringStuff.ini'))
 
     #obtain url of pinterest board
     url = Config.get('Pinterest','RandomBoard')
