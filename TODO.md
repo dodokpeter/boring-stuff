@@ -17,7 +17,6 @@ Running list of things discussed but not yet done. Remove an item once it's buil
 ## Known bugs/gaps
 
 - `clean-logs` console script in `pyproject.toml` points to `scripts.cleanup:run`, which doesn't exist - crashes if run
-- `lucky`, `mapit`, `negative`, `pinterest`, `openwebs`, `mp4to3` have no working bare command - they only run via `.bat` shims that depend on `BORING_STUFF_PATH`, which is unset on this machine (workaround: `uv run cases/webs/<script>.py`)
 - `scripts/hello.py` throws `UnicodeEncodeError` on this console's codepage (emoji in a `print`)
 - `mapit.py`/`negative.py` lack basic error handling (empty clipboard, non-image files in a directory)
 

@@ -44,11 +44,30 @@ Run command:
     mapit  (takes address from clipboard)
     mapit Bratislava
 
+#### Mp4to3
+Extract mp3 audio from every .mp4 file already sitting in a folder (doesn't
+download anything itself - see `youtube -a` for downloading + extracting in
+one step).
+
+Run command:
+
+    mp4to3 [folder]
+
 #### Negative
 Invert picture in negative colors.
 Run command:
 
     negative [directory_with_picture]
+
+#### Openwebs
+Open a batch of your usual sites in the browser, grouped by tag.
+
+Run command:
+
+    openwebs         (opens all groups)
+    openwebs init    (mail/calendar/translate)
+    openwebs s       (social sites)
+    openwebs n       (news sites)
 
 #### Pinterest
 Open random picture from pinteres board
