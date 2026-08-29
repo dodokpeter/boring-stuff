@@ -1,0 +1,107 @@
+#! python3
+# One-time setup for a "Boring" taskbar shortcut:
+#   - generates a B-lettered icon
+#   - creates Boring.lnk, whose default target runs clipsave
+#   - registers a Jump List (right-click menu) with b64d/b64e tasks
+#
+# Run: uv run python devs/taskbar/setup_taskbar_icon.py
+# Then: open the folder it prints, right-click Boring.lnk, "Pin to taskbar".
+# Safe to re-run any time to refresh the icon or the Jump List tasks.
+
+import os
+from pathlib import Path
+
+import pythoncom
+import win32com.propsys.propsys as propsys
+import win32com.propsys.pscon as pscon
+import win32com.shell.shell as shell
+import win32com.shell.shellcon as shellcon
+from PIL import Image, ImageDraw, ImageFont
+
+APP_ID = "BoringStuff.Launcher"
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+TASKBAR_DIR = Path(__file__).resolve().parent
+DATA_DIR = Path.home() / ".boring-stuff"
+ICON_PATH = DATA_DIR / "boring.ico"
+SHORTCUT_PATH = DATA_DIR / "Boring.lnk"
+CMD_EXE = r"C:\Windows\System32\cmd.exe"
+
+# (display title in the Jump List, .bat file to run)
+TASKS = [
+    ("Decode base64 (b64d)", "run_b64d.bat"),
+    ("Encode base64 (b64e)", "run_b64e.bat"),
+]
+
+
+def generate_icon():
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    font = None
+    for name in ("arialbd.ttf", "segoeuib.ttf", "calibrib.ttf"):
+        path = os.path.join(os.environ["WINDIR"], "Fonts", name)
+        if os.path.exists(path):
+            font = ImageFont.truetype(path, 190)
+            break
+    if font is None:
+        font = ImageFont.load_default()
+
+    size = 256
+    img = Image.new("RGBA", (size, size), (25, 25, 25, 255))
+    draw = ImageDraw.Draw(img)
+    bbox = draw.textbbox((0, 0), "B", font=font)
+    w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    draw.text(((size - w) / 2 - bbox[0], (size - h) / 2 - bbox[1]), "B", font=font, fill=(240, 200, 60, 255))
+    img.save(ICON_PATH, sizes=[(16, 16), (32, 32), (48, 48), (256, 256)])
+
+
+def make_link(bat_name):
+    link = pythoncom.CoCreateInstance(shell.CLSID_ShellLink, None, pythoncom.CLSCTX_INPROC_SERVER, shell.IID_IShellLinkW)
+    link.SetPath(CMD_EXE)
+    link.SetArguments(f'/c "{TASKBAR_DIR / bat_name}"')
+    link.SetIconLocation(str(ICON_PATH), 0)
+    link.SetWorkingDirectory(str(REPO_ROOT))
+    return link
+
+
+def set_title(link, title):
+    store = link.QueryInterface(propsys.IID_IPropertyStore)
+    store.SetValue(pscon.PKEY_Title, propsys.PROPVARIANTType(title))
+    store.Commit()
+
+
+def create_main_shortcut():
+    link = make_link("run_clipsave.bat")
+    link.SetDescription("Boring - clipsave")
+    persist = link.QueryInterface(pythoncom.IID_IPersistFile)
+    persist.Save(str(SHORTCUT_PATH), True)
+
+    store = propsys.SHGetPropertyStoreFromParsingName(str(SHORTCUT_PATH), None, shellcon.GPS_READWRITE, propsys.IID_IPropertyStore)
+    store.SetValue(pscon.PKEY_AppUserModel_ID, propsys.PROPVARIANTType(APP_ID))
+    store.Commit()
+
+
+def register_jump_list():
+    collection = pythoncom.CoCreateInstance(shell.CLSID_EnumerableObjectCollection, None, pythoncom.CLSCTX_INPROC_SERVER, shell.IID_IObjectCollection)
+    for title, bat_name in TASKS:
+        task_link = make_link(bat_name)
+        set_title(task_link, title)
+        collection.AddObject(task_link)
+
+    dest_list = pythoncom.CoCreateInstance(shell.CLSID_DestinationList, None, pythoncom.CLSCTX_INPROC_SERVER, shell.IID_ICustomDestinationList)
+    dest_list.SetAppID(APP_ID)
+    dest_list.BeginList()
+    dest_list.AddUserTasks(collection.QueryInterface(shell.IID_IObjectArray))
+    dest_list.CommitList()
+
+
+def main():
+    generate_icon()
+    create_main_shortcut()
+    register_jump_list()
+
+    print(f"Shortcut created: {SHORTCUT_PATH}")
+    print("Right-click it in Explorer and choose 'Pin to taskbar' to finish setup.")
+    print("Left-click on the pinned icon runs clipsave; right-click shows the b64d/b64e menu.")
+
+
+if __name__ == "__main__":
+    main()

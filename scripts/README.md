@@ -85,3 +85,16 @@ Run command:
 
 If the clipboard isn't valid base64 (for `b64d`), or is empty, prints a
 message and exits non-zero without touching the clipboard.
+
+## Boring taskbar icon
+A pinned taskbar shortcut ("B" icon): left-click runs `clipsave`, right-click
+shows a Jump List menu with `b64d`/`b64e`. Each opens a terminal window that
+shows the result and closes itself after 60 seconds (or on any keypress).
+
+One-time setup:
+
+    uv run python devs/taskbar/setup_taskbar_icon.py
+
+Then, in the folder it prints (`%USERPROFILE%\.boring-stuff`), right-click
+`Boring.lnk` and choose "Pin to taskbar". Safe to re-run the setup script any
+time - it refreshes the icon and the Jump List tasks in place.
