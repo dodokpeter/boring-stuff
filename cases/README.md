@@ -12,7 +12,7 @@ shows the result and closes itself after 60 seconds (or on any keypress).
 
 One-time setup:
 
-    uv run python devs/taskbar/setup_taskbar_icon.py
+    uv run python cases/devs/taskbar/setup_taskbar_icon.py
 
 Then, in the folder it prints (`%USERPROFILE%\.boring-stuff`), right-click
 `Boring.lnk` and choose "Pin to taskbar". Safe to re-run the setup script any
@@ -20,68 +20,7 @@ time - it refreshes the icon and the Jump List tasks in place.
 
 ## Available scripts
 
-### cases
-
-#### Lucky
-Open several (default is 4) page in default browser from googling
-
-Run command:
-
-    lucky tips for developers
-    lucky -n3 tips for developers
-
-Parameters:
-
-**-n3** - number of pages opened in browser
-
-#### Mapit
-Open google map with specific address:
-- default is taken from clipboard
-- from argument of the command
-
-Run command:
-
-    mapit  (takes address from clipboard)
-    mapit Bratislava
-
-#### Mp4to3
-Extract mp3 audio from every .mp4 file already sitting in a folder (doesn't
-download anything itself - see `youtube -a` for downloading + extracting in
-one step).
-
-Run command:
-
-    mp4to3 [folder]
-
-#### Negative
-Invert picture in negative colors.
-Run command:
-
-    negative [directory_with_picture]
-
-#### Openwebs
-Open a batch of your usual sites in the browser, grouped by tag.
-
-Run command:
-
-    openwebs         (opens all groups)
-    openwebs init    (mail/calendar/translate)
-    openwebs s       (social sites)
-    openwebs n       (news sites)
-
-#### Pinterest
-Open random picture from pinteres board
-
-Run command:
-
-    pinterest
-
-Configuration (in userHome/BoringStuff.ini):
-
-    [Pinterest]
-    RandomBoard: https://pinterest.com/username/board.rss
-
-### devs
+### cases/devs
 
 #### B64d / B64e
 Base64 decode/encode the clipboard's text, in place - result goes straight
@@ -110,14 +49,70 @@ merged remotely (e.g. via a squash-merged PR), even if your local default
 branch hasn't been updated yet. Only deletes branches git itself considers
 safe to delete (`git branch -d`, not `-D`).
 
-### scripts
+### cases/maps
 
-#### Hello
+#### Mapit
+Open google map with specific address:
+- default is taken from clipboard
+- from argument of the command
+
 Run command:
 
-    hello
+    mapit  (takes address from clipboard)
+    mapit Bratislava
 
-to ensure that scrips can be run from CMD.
+### cases/pictures
+
+#### Negative
+Invert picture in negative colors.
+Run command:
+
+    negative [directory_with_picture]
+
+### cases/webs
+
+#### Lucky
+Open several (default is 4) page in default browser from googling
+
+Run command:
+
+    lucky tips for developers
+    lucky -n3 tips for developers
+
+Parameters:
+
+**-n3** - number of pages opened in browser
+
+#### Mp4to3
+Extract mp3 audio from every .mp4 file already sitting in a folder (doesn't
+download anything itself - see `youtube -a` for downloading + extracting in
+one step).
+
+Run command:
+
+    mp4to3 [folder]
+
+#### Openwebs
+Open a batch of your usual sites in the browser, grouped by tag.
+
+Run command:
+
+    openwebs         (opens all groups)
+    openwebs init    (mail/calendar/translate)
+    openwebs s       (social sites)
+    openwebs n       (news sites)
+
+#### Pinterest
+Open random picture from pinteres board
+
+Run command:
+
+    pinterest
+
+Configuration (in userHome/BoringStuff.ini):
+
+    [Pinterest]
+    RandomBoard: https://pinterest.com/username/board.rss
 
 #### Youtube
 Download youtube video.
@@ -127,7 +122,7 @@ Run command:
     youtube [youtube url]
     youtube [youtube playlist url]
 
-### wins
+### cases/wins
 
 #### Clipsave
 Save clipboard content to your Downloads folder. Auto-detects the content
@@ -146,3 +141,12 @@ Run command:
 Timestamp format is `YYYY-MM-dd HH-mm-ss` (e.g. `2026-08-28 09-45-50`).
 Prints a message and exits non-zero if the clipboard is empty or nothing
 could be saved.
+
+### scripts
+
+#### Hello
+Run command:
+
+    hello
+
+to ensure that scrips can be run from CMD.

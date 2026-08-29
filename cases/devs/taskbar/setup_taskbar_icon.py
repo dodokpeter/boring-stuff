@@ -19,7 +19,7 @@ import win32com.shell.shellcon as shellcon
 from PIL import Image, ImageDraw, ImageFont
 
 APP_ID = "BoringStuff.Launcher"
-REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 TASKBAR_DIR = Path(__file__).resolve().parent
 DATA_DIR = Path.home() / ".boring-stuff"
 ICON_PATH = DATA_DIR / "boring.ico"

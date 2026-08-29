@@ -77,7 +77,7 @@ If the logs say challenge solving failed even after the steps above, it's time t
 ## 📖 Available Commands
 Run `hello` in your terminal to verify the installation.
 
-* [Command Reference](./scripts/README.md) - Full list of available automation scripts.
+* [Command Reference](./cases/README.md) - Full list of available automation scripts.
 
 
 

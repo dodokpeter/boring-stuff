@@ -4,7 +4,7 @@ pytest.importorskip("win32com.shell.shell")
 
 from PIL import Image
 
-from devs.taskbar import setup_taskbar_icon
+from cases.devs.taskbar import setup_taskbar_icon
 
 
 @pytest.fixture(autouse=True)

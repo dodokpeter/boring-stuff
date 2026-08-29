@@ -3,7 +3,7 @@ from datetime import datetime
 import pytest
 from PIL import Image
 
-from wins import clipsave
+from cases.wins import clipsave
 
 
 @pytest.fixture(autouse=True)
