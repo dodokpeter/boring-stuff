@@ -62,6 +62,20 @@ Configuration (in userHome/BoringStuff.ini):
     [Pinterest]
     RandomBoard: https://pinterest.com/username/board.rss
 
+### devs
+
+#### B64d / B64e
+Base64 decode/encode the clipboard's text, in place - result goes straight
+back onto the clipboard, no files, no arguments.
+
+Run command:
+
+    b64d   (decode)
+    b64e   (encode)
+
+If the clipboard isn't valid base64 (for `b64d`), or is empty, prints a
+message and exits non-zero without touching the clipboard.
+
 #### Prune-branches
 Delete local git branches already merged into origin's default branch
 (master/main). Run from inside whichever repo you want to clean up - not
@@ -76,20 +90,6 @@ Fetches from origin first so the merged-status check reflects branches
 merged remotely (e.g. via a squash-merged PR), even if your local default
 branch hasn't been updated yet. Only deletes branches git itself considers
 safe to delete (`git branch -d`, not `-D`).
-
-### devs
-
-#### B64d / B64e
-Base64 decode/encode the clipboard's text, in place - result goes straight
-back onto the clipboard, no files, no arguments.
-
-Run command:
-
-    b64d   (decode)
-    b64e   (encode)
-
-If the clipboard isn't valid base64 (for `b64d`), or is empty, prints a
-message and exits non-zero without touching the clipboard.
 
 ### scripts
 

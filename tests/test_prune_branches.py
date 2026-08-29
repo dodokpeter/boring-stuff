@@ -2,7 +2,7 @@ import subprocess
 
 import pytest
 
-from cases.git import prune_branches
+from devs import prune_branches
 
 
 def git(*args, cwd):
