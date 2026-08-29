@@ -1,3 +1,5 @@
+import pytest
+
 from cases.webs import pinterest
 
 
@@ -13,7 +15,8 @@ def fake_response(xml_bytes):
 
 def configure(monkeypatch, url="https://example.com/board.rss"):
     monkeypatch.setattr(
-        pinterest, "load_config",
+        pinterest,
+        "load_config",
         lambda name: {"pinterest": {"randomBoard": url}},
     )
 
@@ -57,8 +60,5 @@ def test_handles_a_feed_with_only_one_item(monkeypatch):
 def test_raises_when_board_not_configured(monkeypatch):
     monkeypatch.setattr(pinterest, "load_config", lambda name: {})
 
-    try:
+    with pytest.raises(KeyError):
         pinterest.main()
-        assert False, "expected a KeyError for missing config"
-    except KeyError:
-        pass

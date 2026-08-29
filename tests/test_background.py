@@ -20,11 +20,12 @@ class FakeKey:
 @pytest.fixture
 def fake_registry(monkeypatch):
     """Replace winreg.OpenKey/SetValueEx with in-memory stand-ins and return
-    the dict that SetValueEx calls get recorded into. """
+    the dict that SetValueEx calls get recorded into."""
     written = {}
     monkeypatch.setattr(background.winreg, "OpenKey", lambda *a, **k: FakeKey())
     monkeypatch.setattr(
-        background.winreg, "SetValueEx",
+        background.winreg,
+        "SetValueEx",
         lambda key, name, reserved, value_type, value: written.__setitem__(name, value),
     )
     return written
@@ -33,9 +34,9 @@ def fake_registry(monkeypatch):
 @pytest.fixture
 def fake_spi(monkeypatch):
     """Replace get_sys_parameters_info with a stand-in that records calls
-    and always reports success. """
+    and always reports success."""
     calls = []
-    monkeypatch.setattr(background, "get_sys_parameters_info", lambda: (lambda *args: calls.append(args) or 1))
+    monkeypatch.setattr(background, "get_sys_parameters_info", lambda: lambda *args: calls.append(args) or 1)
     return calls
 
 
@@ -46,7 +47,8 @@ def test_picks_a_random_wallpaper_and_applies_it(tmp_path, monkeypatch, fake_spi
     (directory / "two.jpg").write_bytes(b"")
 
     monkeypatch.setattr(
-        background, "load_config",
+        background,
+        "load_config",
         lambda name: {"wallpaper": {"directory": str(directory)}},
     )
     monkeypatch.setattr(background.random, "choice", lambda seq: sorted(seq)[0])
@@ -76,14 +78,17 @@ def test_set_wallpaper_fit_style_writes_fit_registry_values(fake_registry):
 def test_raises_when_directory_not_configured(monkeypatch):
     monkeypatch.setattr(background, "load_config", lambda name: {})
 
-    try:
+    with pytest.raises(KeyError):
         background.main([])
-        assert False, "expected a KeyError for missing config"
-    except KeyError:
-        pass
 
 
-def test_color_argument_generates_solid_color_image_and_applies_it(tmp_path, monkeypatch, fake_registry, fake_spi, capsys):
+def test_color_argument_generates_solid_color_image_and_applies_it(
+    tmp_path,
+    monkeypatch,
+    fake_registry,
+    fake_spi,
+    capsys,
+):
     image_path = tmp_path / "background_color.bmp"
     monkeypatch.setattr(background, "BACKGROUND_COLOR_IMAGE", image_path)
 

@@ -16,7 +16,9 @@
 #! python3
 import argparse
 from pathlib import Path
+
 import yt_dlp
+
 
 def main():
     # 1. Setup CLI Arguments
@@ -34,50 +36,54 @@ def main():
     # 3. Configure Options
     ydl_opts = {
         # If not a playlist, it goes to root; if a playlist, it goes to a subfolder
-        'outtmpl': str(base_dir / '%(title)s.%(ext)s'),
-        'ignoreerrors': True,
-        'retries': 3,
+        "outtmpl": str(base_dir / "%(title)s.%(ext)s"),
+        "ignoreerrors": True,
+        "retries": 3,
         # Logic: Only download playlist if -p is passed
-        'noplaylist': not args.playlist,
-        'extract_flat': False,        # Ensures it expands the playlist items
-        'yes_playlist': args.playlist, # Forces the playlist behavior
+        "noplaylist": not args.playlist,
+        "extract_flat": False,  # Ensures it expands the playlist items
+        "yes_playlist": args.playlist,  # Forces the playlist behavior
     }
 
     if args.browser:
-        ydl_opts['cookiesfrombrowser'] = (args.browser,)
-        ydl_opts['js_runtimes'] = {'deno': {}}
-        ydl_opts['remote_components'] = {'ejs:github'}
+        ydl_opts["cookiesfrombrowser"] = (args.browser,)
+        ydl_opts["js_runtimes"] = {"deno": {}}
+        ydl_opts["remote_components"] = {"ejs:github"}
     # Adjust folder structure if it's a playlist
     if args.playlist:
         # The NA modification: We can tell yt-dlp to restrict only the filename part
-        ydl_opts['outtmpl'] = str(base_dir / '%(playlist_title,playlist)q' / '%(playlist_index)s - %(title)q.%(ext)s')
+        ydl_opts["outtmpl"] = str(base_dir / "%(playlist_title,playlist)q" / "%(playlist_index)s - %(title)q.%(ext)s")
     else:
         # Adding 'q' to the end of the variable (e.g., %(title)q)
         # tells yt-dlp to quote/sanitize the string for filenames automatically
-        ydl_opts['outtmpl'] = str(base_dir / '%(title)s.%(ext)s')
+        ydl_opts["outtmpl"] = str(base_dir / "%(title)s.%(ext)s")
     # 4. Handle Format & Audio Extraction
     if args.audio:
         # Download video, then keep the video and extract audio (keeping both)
-        ydl_opts['format'] = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
-        ydl_opts['postprocessors'] = [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }, {
-            # This is the key: it tells yt-dlp NOT to delete the video after extracting audio
-            'key': 'FFmpegVideoConvertor',
-            'preferedformat': 'mp4',
-        }]
-        ydl_opts['keepvideo'] = True
+        ydl_opts["format"] = "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+        ydl_opts["postprocessors"] = [
+            {
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": "mp3",
+                "preferredquality": "192",
+            },
+            {
+                # This is the key: it tells yt-dlp NOT to delete the video after extracting audio
+                "key": "FFmpegVideoConvertor",
+                "preferedformat": "mp4",
+            },
+        ]
+        ydl_opts["keepvideo"] = True
     else:
         # Standard Video only
-        ydl_opts['format'] = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
+        ydl_opts["format"] = "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
 
     # 5. Execute
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         for url in args.urls:
             print(f"Processing: {url} (Playlist: {args.playlist}, Audio: {args.audio})")
             ydl.download([url])
+
 
 if __name__ == "__main__":
     main()

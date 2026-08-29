@@ -41,4 +41,22 @@ package = true
 [dependency-groups]
 dev = [
     "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.16.5",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.coverage.run]
+source = ["cases", "core", "scripts"]
+
+[tool.ruff]
+line-length = 120
+# rasbpi/ is a standalone legacy Python 2 script, not part of the packaged
+# boring-stuff tool suite (not in [tool.setuptools.packages.find], untested).
+extend-exclude = ["rasbpi"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "BLE"]

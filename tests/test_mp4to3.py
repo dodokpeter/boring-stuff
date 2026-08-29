@@ -17,7 +17,8 @@ def test_extracts_audio_for_each_mp4_in_folder(tmp_path, monkeypatch):
 
     calls = []
     monkeypatch.setattr(
-        mp4to3, "extract_audio",
+        mp4to3,
+        "extract_audio",
         lambda input_path, output_path: calls.append((str(input_path), output_path)),
     )
     mp4to3.main([str(tmp_path)])

@@ -23,15 +23,8 @@ Grouped roughly by payoff; each item names the file it applies to.
 
 ## Tooling and CI
 
-- No linter or formatter configured. Adding `ruff` (lint + format) would catch
-  unused locals and bare `except Exception` cases elsewhere in the repo.
-- [.github/workflows/tests.yml](.github/workflows/tests.yml) runs only on
-  `ubuntu-latest` and a single Python version, yet a large part of the codebase is
-  Windows-only (`pywin32`, the taskbar setup, `background`). Add a
-  `windows-latest` matrix leg so that code is exercised at all.
-- No lint job and no coverage reporting in CI.
-- No `pytest` configuration in `pyproject.toml` (`testpaths`, `pythonpath`) - the
-  `sys.path` insertion in `conftest.py` could be replaced by `pythonpath = ["."]`.
+- [.github/workflows/tests.yml](.github/workflows/tests.yml) only tests a
+  single Python version (3.12) - consider a matrix leg for newer versions too.
 
 ## Test gaps
 

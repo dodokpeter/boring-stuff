@@ -60,7 +60,7 @@ def resolve_color(name):
     """Look up a color name's (R, G, B) tuple: first against the standard
     palette, then falling back to CSS3/X11 color names (spaces, dashes and
     underscores are stripped, so "light blue" matches "lightblue"). Returns
-    None if neither matches. """
+    None if neither matches."""
     normalized = name.strip().lower()
     if normalized in COLOR_PALETTE:
         return COLOR_PALETTE[normalized]
@@ -73,18 +73,17 @@ def resolve_color(name):
 
 
 def is_64_windows():
-    """Find out how many bits is OS. """
-    return struct.calcsize('P') * 8 == 64
+    """Find out how many bits is OS."""
+    return struct.calcsize("P") * 8 == 64
 
 
 def get_sys_parameters_info():
-    """Based on if this is 32bit or 64bit returns correct version of SystemParametersInfo function. """
-    return ctypes.windll.user32.SystemParametersInfoW if is_64_windows() \
-        else ctypes.windll.user32.SystemParametersInfoA
+    """Based on if this is 32bit or 64bit returns correct version of SystemParametersInfo function."""
+    return ctypes.windll.user32.SystemParametersInfoW if is_64_windows() else ctypes.windll.user32.SystemParametersInfoA
 
 
 def set_wallpaper_style(style):
-    """Set the desktop WallpaperStyle in the registry (and disable tiling). """
+    """Set the desktop WallpaperStyle in the registry (and disable tiling)."""
     with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Control Panel\Desktop", 0, winreg.KEY_SET_VALUE) as key:
         winreg.SetValueEx(key, "WallpaperStyle", 0, winreg.REG_SZ, style)
         winreg.SetValueEx(key, "TileWallpaper", 0, winreg.REG_SZ, TILE_WALLPAPER_OFF)
@@ -92,7 +91,7 @@ def set_wallpaper_style(style):
 
 def set_wallpaper_fit_style():
     """Set the desktop wallpaper style to "Fit" so a picture is scaled to fit
-    the screen instead of being stretched. """
+    the screen instead of being stretched."""
     set_wallpaper_style(WALLPAPER_STYLE_FIT)
 
 
@@ -108,7 +107,7 @@ def apply_wallpaper(path):
 
 
 def set_solid_color_background(rgb):
-    """Generate a small solid-color image and apply it as the wallpaper. """
+    """Generate a small solid-color image and apply it as the wallpaper."""
     BACKGROUND_COLOR_IMAGE.parent.mkdir(parents=True, exist_ok=True)
     Image.new("RGB", (32, 32), rgb).save(BACKGROUND_COLOR_IMAGE, "BMP")
 
@@ -127,7 +126,8 @@ def set_random_picture_background(directory):
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Set the desktop background")
     parser.add_argument(
-        "color", nargs="*",
+        "color",
+        nargs="*",
         help=(
             "solid color instead of a random picture (e.g. 'green' or 'light blue'). "
             f"Tries the standard palette first ({', '.join(sorted(COLOR_PALETTE))}); "
@@ -149,7 +149,7 @@ def main(argv=None):
         return
 
     config = load_config(None)
-    directory = config['wallpaper']['directory']
+    directory = config["wallpaper"]["directory"]
     set_random_picture_background(directory)
 
 

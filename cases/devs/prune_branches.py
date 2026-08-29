@@ -63,7 +63,7 @@ def prune_remote(remote_ref, default_branch, do_delete):
     for b in merged.stdout.splitlines():
         if not b or not b.startswith("origin/") or b == default_remote_ref:
             continue
-        candidates.append(b[len("origin/"):])
+        candidates.append(b[len("origin/") :])
 
     if not candidates:
         print(f"No remote branches to prune (nothing on origin merged into {remote_ref} besides {default_branch}).")
@@ -74,7 +74,10 @@ def prune_remote(remote_ref, default_branch, do_delete):
         print(f"  {b}")
 
     if not do_delete:
-        print(f"\nDry run - nothing deleted. Re-run with --remote --yes to actually delete these {len(candidates)} branch(es) on origin.")
+        print(
+            f"\nDry run - nothing deleted. Re-run with --remote --yes to actually "
+            f"delete these {len(candidates)} branch(es) on origin."
+        )
         return
 
     for b in candidates:
@@ -88,7 +91,12 @@ def prune_remote(remote_ref, default_branch, do_delete):
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Delete branches already merged into origin's default branch")
     parser.add_argument("--yes", "-y", action="store_true", help="actually delete (default is a dry run)")
-    parser.add_argument("--remote", "-r", action="store_true", help="operate on origin's branches instead of local ones")
+    parser.add_argument(
+        "--remote",
+        "-r",
+        action="store_true",
+        help="operate on origin's branches instead of local ones",
+    )
     args = parser.parse_args(argv)
 
     if run("rev-parse", "--is-inside-work-tree").returncode != 0:

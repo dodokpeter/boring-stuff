@@ -106,8 +106,9 @@ first thing to check.
 Every new or fixed script gets real pytest coverage in `tests/`. Fake the
 external interactions - clipboard (`pyperclip`), network (`requests`),
 browser (`webbrowser.open`), filesystem - with `monkeypatch` rather than
-hitting real systems in CI, since CI runs on `ubuntu-latest` and can't
-touch a Windows clipboard or open a browser anyway.
+hitting real systems in CI: CI runs on both `ubuntu-latest` and
+`windows-latest`, and neither can touch a real clipboard or open a real
+browser.
 
 For anything that only makes sense on Windows (`pywin32`, `tkinter`), guard
 the test module with `pytest.importorskip(...)` so it skips cleanly on
@@ -127,6 +128,15 @@ real during manual verification (the actual clipboard, `~/Downloads`, the
 real `BoringStuff.yml`, real local/remote git branches), clean it up
 immediately afterward - don't leave test data sitting in the user's real
 files or repo state.
+
+## Linting and formatting
+
+`ruff` (lint + format) is configured in `pyproject.toml` and gated in CI as
+its own `lint` job, separate from `test`. Before committing, run
+`uv run ruff check .` and `uv run ruff format .` (the latter rewrites files
+in place - use `--check` instead if you just want to know whether it would).
+`rasbpi/` is excluded (a standalone legacy Python 2 script, not part of the
+packaged `boring-stuff` tool suite).
 
 ## Packaging
 
