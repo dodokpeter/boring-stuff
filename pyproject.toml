@@ -20,6 +20,7 @@ yt = "scripts.webs.youtube:main"
 clipsave = "wins.clipsave:main"
 b64d = "devs.base64_clip:main_decode"
 b64e = "devs.base64_clip:main_encode"
+prune-branches = "devs.prune_branches:main"
 
 [tool.setuptools]
 packages = []  # Tells it not to look for library packages
