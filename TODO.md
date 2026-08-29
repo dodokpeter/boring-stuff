@@ -49,7 +49,7 @@ Grouped roughly by payoff; each item names the file it applies to.
   builtin shadowing, unused locals, and the bare `except Exception` cases above.
 - [.github/workflows/tests.yml](.github/workflows/tests.yml) runs only on
   `ubuntu-latest` and a single Python version, yet a large part of the codebase is
-  Windows-only (`pywin32`, the taskbar setup, `setBackgroundPicture`). Add a
+  Windows-only (`pywin32`, the taskbar setup, `background`). Add a
   `windows-latest` matrix leg so that code is exercised at all.
 - No lint job and no coverage reporting in CI.
 - No `pytest` configuration in `pyproject.toml` (`testpaths`, `pythonpath`) - the

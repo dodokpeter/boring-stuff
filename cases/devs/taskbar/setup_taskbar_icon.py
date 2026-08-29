@@ -2,7 +2,7 @@
 # One-time setup for a "Boring" taskbar shortcut:
 #   - generates a B-lettered icon
 #   - creates Boring.lnk, whose default target runs clipsave
-#   - registers a Jump List (right-click menu) with b64d/b64e/set-wallpaper
+#   - registers a Jump List (right-click menu) with b64d/b64e/background
 #     tasks
 #
 # Run: uv run python cases/devs/taskbar/setup_taskbar_icon.py
@@ -31,7 +31,7 @@ CMD_EXE = r"C:\Windows\System32\cmd.exe"
 TASKS = [
     ("Decode base64 (b64d)", "run_b64d.bat"),
     ("Encode base64 (b64e)", "run_b64e.bat"),
-    ("Set wallpaper", "run_set_wallpaper.bat"),
+    ("Set background", "run_background.bat"),
 ]
 
 
@@ -102,7 +102,7 @@ def main():
 
     print(f"Shortcut created: {SHORTCUT_PATH}")
     print("Right-click it in Explorer and choose 'Pin to taskbar' to finish setup.")
-    print("Left-click on the pinned icon runs clipsave; right-click shows the b64d/b64e/set-wallpaper menu.")
+    print("Left-click on the pinned icon runs clipsave; right-click shows the b64d/b64e/background menu.")
 
 
 if __name__ == "__main__":
