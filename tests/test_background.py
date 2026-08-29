@@ -4,6 +4,8 @@ import pytest
 
 pytest.importorskip("winreg")
 
+from PIL import Image
+
 from cases.wins import background
 
 
@@ -28,7 +30,16 @@ def fake_registry(monkeypatch):
     return written
 
 
-def test_picks_a_random_wallpaper_and_applies_it(tmp_path, monkeypatch, capsys):
+@pytest.fixture
+def fake_spi(monkeypatch):
+    """Replace get_sys_parameters_info with a stand-in that records calls
+    and always reports success. """
+    calls = []
+    monkeypatch.setattr(background, "get_sys_parameters_info", lambda: (lambda *args: calls.append(args) or 1))
+    return calls
+
+
+def test_picks_a_random_wallpaper_and_applies_it(tmp_path, monkeypatch, fake_spi, capsys):
     directory = tmp_path / "wallpapers"
     directory.mkdir()
     (directory / "one.jpg").write_bytes(b"")
@@ -40,10 +51,6 @@ def test_picks_a_random_wallpaper_and_applies_it(tmp_path, monkeypatch, capsys):
     )
     monkeypatch.setattr(background.random, "choice", lambda seq: sorted(seq)[0])
 
-    calls = []
-    fake_spi = lambda *args: calls.append(args) or 1  # truthy = success, per Windows API
-    monkeypatch.setattr(background, "get_sys_parameters_info", lambda: fake_spi)
-
     style_calls = []
     monkeypatch.setattr(background, "set_wallpaper_fit_style", lambda: style_calls.append(True))
 
@@ -51,8 +58,8 @@ def test_picks_a_random_wallpaper_and_applies_it(tmp_path, monkeypatch, capsys):
 
     assert style_calls == [True]
 
-    assert len(calls) == 1
-    action, _param, path, _flags = calls[0]
+    assert len(fake_spi) == 1
+    action, _param, path, _flags = fake_spi[0]
     assert action == background.SPI_SETDESKWALLPAPER
     assert Path(path) == directory / "one.jpg"
 
@@ -76,30 +83,35 @@ def test_raises_when_directory_not_configured(monkeypatch):
         pass
 
 
-def test_color_argument_sets_solid_background(fake_registry, monkeypatch, capsys):
-    calls = []
-    fake_spi = lambda *args: calls.append(args) or 1
-    monkeypatch.setattr(background, "get_sys_parameters_info", lambda: fake_spi)
+def test_color_argument_generates_solid_color_image_and_applies_it(tmp_path, monkeypatch, fake_registry, fake_spi, capsys):
+    image_path = tmp_path / "background_color.bmp"
+    monkeypatch.setattr(background, "BACKGROUND_COLOR_IMAGE", image_path)
 
     background.main(["green"])
 
-    assert fake_registry == {"Background": "0 128 0"}
+    assert image_path.exists()
+    with Image.open(image_path) as img:
+        assert img.convert("RGB").getpixel((0, 0)) == (0, 128, 0)
 
-    assert len(calls) == 1
-    action, _param, path, _flags = calls[0]
+    assert fake_registry == {"WallpaperStyle": "10", "TileWallpaper": "0"}
+
+    assert len(fake_spi) == 1
+    action, _param, path, _flags = fake_spi[0]
     assert action == background.SPI_SETDESKWALLPAPER
-    assert path == ""
+    assert path == str(image_path)
 
     out = capsys.readouterr().out
     assert "green" in out
 
 
-def test_color_argument_is_case_insensitive(fake_registry, monkeypatch):
-    monkeypatch.setattr(background, "get_sys_parameters_info", lambda: (lambda *args: 1))
+def test_color_argument_is_case_insensitive(tmp_path, monkeypatch, fake_registry, fake_spi):
+    image_path = tmp_path / "background_color.bmp"
+    monkeypatch.setattr(background, "BACKGROUND_COLOR_IMAGE", image_path)
 
     background.main(["GrEeN"])
 
-    assert fake_registry == {"Background": "0 128 0"}
+    with Image.open(image_path) as img:
+        assert img.convert("RGB").getpixel((0, 0)) == (0, 128, 0)
 
 
 def test_unknown_color_exits_with_error(capsys):
@@ -111,22 +123,25 @@ def test_unknown_color_exits_with_error(capsys):
 
 
 def test_resolve_color_prefers_the_standard_palette():
-    assert background.resolve_color("green") == "0 128 0"
+    assert background.resolve_color("green") == (0, 128, 0)
 
 
 def test_resolve_color_falls_back_to_css3_x11_names():
-    assert background.resolve_color("light blue") == "173 216 230"
-    assert background.resolve_color("steelblue") == "70 130 180"
+    assert background.resolve_color("light blue") == (173, 216, 230)
+    assert background.resolve_color("steelblue") == (70, 130, 180)
 
 
 def test_resolve_color_returns_none_for_unknown_name():
     assert background.resolve_color("not-a-real-color") is None
 
 
-def test_multi_word_color_argument_resolves_via_css3_x11(fake_registry, monkeypatch, capsys):
-    monkeypatch.setattr(background, "get_sys_parameters_info", lambda: (lambda *args: 1))
+def test_multi_word_color_argument_resolves_via_css3_x11(tmp_path, monkeypatch, fake_registry, fake_spi, capsys):
+    image_path = tmp_path / "background_color.bmp"
+    monkeypatch.setattr(background, "BACKGROUND_COLOR_IMAGE", image_path)
 
     background.main(["light", "blue"])
 
-    assert fake_registry == {"Background": "173 216 230"}
+    with Image.open(image_path) as img:
+        assert img.convert("RGB").getpixel((0, 0)) == (173, 216, 230)
+
     assert "light blue" in capsys.readouterr().out

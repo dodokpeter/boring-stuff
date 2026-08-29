@@ -16,51 +16,60 @@ import random
 import re
 import struct
 import winreg
+from pathlib import Path
 
-from PIL import ImageColor
+from PIL import Image, ImageColor
 
 from core.configuration.user_conf import load_config
 
 SPI_SETDESKWALLPAPER = 20
 
-# WallpaperStyle "6" = Fit: scale the image to fit inside the screen while
-# keeping its aspect ratio, instead of the default stretch-to-fill.
+# WallpaperStyle: "6" = Fit (scale a picture to fit inside the screen,
+# keeping its aspect ratio, instead of the default stretch-to-fill);
+# "10" = Fill (scale to cover the screen, cropping if needed - used for
+# solid colors, where cropping/scaling can't visibly distort anything).
 WALLPAPER_STYLE_FIT = "6"
+WALLPAPER_STYLE_FILL = "10"
 TILE_WALLPAPER_OFF = "0"
 
-# Standard 12-color palette, as "R G B" values for the Control Panel\Colors
-# "Background" registry value.
+# A solid color is applied as a generated image rather than through the
+# legacy Control Panel\Colors registry key: modern Windows no longer honors
+# that key for the actual desktop (SPI_SETDESKWALLPAPER with an empty path
+# just shows black), so a real image is the only reliable way to get a flat
+# color background.
+BACKGROUND_COLOR_IMAGE = Path.home() / ".boring-stuff" / "background_color.bmp"
+
+# Standard 12-color palette, as (R, G, B) tuples.
 COLOR_PALETTE = {
-    "red": "255 0 0",
-    "orange": "255 165 0",
-    "yellow": "255 255 0",
-    "green": "0 128 0",
-    "cyan": "0 255 255",
-    "blue": "0 0 255",
-    "purple": "128 0 128",
-    "pink": "255 192 203",
-    "brown": "165 42 42",
-    "black": "0 0 0",
-    "white": "255 255 255",
-    "gray": "128 128 128",
+    "red": (255, 0, 0),
+    "orange": (255, 165, 0),
+    "yellow": (255, 255, 0),
+    "green": (0, 128, 0),
+    "cyan": (0, 255, 255),
+    "blue": (0, 0, 255),
+    "purple": (128, 0, 128),
+    "pink": (255, 192, 203),
+    "brown": (165, 42, 42),
+    "black": (0, 0, 0),
+    "white": (255, 255, 255),
+    "gray": (128, 128, 128),
 }
 
 
 def resolve_color(name):
-    """Look up a color name's "R G B" registry value: first against the
-    standard palette, then falling back to CSS3/X11 color names (spaces,
-    dashes and underscores are stripped, so "light blue" matches
-    "lightblue"). Returns None if neither matches. """
+    """Look up a color name's (R, G, B) tuple: first against the standard
+    palette, then falling back to CSS3/X11 color names (spaces, dashes and
+    underscores are stripped, so "light blue" matches "lightblue"). Returns
+    None if neither matches. """
     normalized = name.strip().lower()
     if normalized in COLOR_PALETTE:
         return COLOR_PALETTE[normalized]
 
     css_name = re.sub(r"[\s_-]", "", normalized)
     try:
-        r, g, b = ImageColor.getrgb(css_name)
+        return ImageColor.getrgb(css_name)
     except ValueError:
         return None
-    return f"{r} {g} {b}"
 
 
 def is_64_windows():
@@ -74,12 +83,17 @@ def get_sys_parameters_info():
         else ctypes.windll.user32.SystemParametersInfoA
 
 
+def set_wallpaper_style(style):
+    """Set the desktop WallpaperStyle in the registry (and disable tiling). """
+    with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Control Panel\Desktop", 0, winreg.KEY_SET_VALUE) as key:
+        winreg.SetValueEx(key, "WallpaperStyle", 0, winreg.REG_SZ, style)
+        winreg.SetValueEx(key, "TileWallpaper", 0, winreg.REG_SZ, TILE_WALLPAPER_OFF)
+
+
 def set_wallpaper_fit_style():
     """Set the desktop wallpaper style to "Fit" so a picture is scaled to fit
     the screen instead of being stretched. """
-    with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Control Panel\Desktop", 0, winreg.KEY_SET_VALUE) as key:
-        winreg.SetValueEx(key, "WallpaperStyle", 0, winreg.REG_SZ, WALLPAPER_STYLE_FIT)
-        winreg.SetValueEx(key, "TileWallpaper", 0, winreg.REG_SZ, TILE_WALLPAPER_OFF)
+    set_wallpaper_style(WALLPAPER_STYLE_FIT)
 
 
 def apply_wallpaper(path):
@@ -94,11 +108,12 @@ def apply_wallpaper(path):
 
 
 def set_solid_color_background(rgb):
-    """Clear any wallpaper picture and set the desktop to a solid color. """
-    with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Control Panel\Colors", 0, winreg.KEY_SET_VALUE) as key:
-        winreg.SetValueEx(key, "Background", 0, winreg.REG_SZ, rgb)
+    """Generate a small solid-color image and apply it as the wallpaper. """
+    BACKGROUND_COLOR_IMAGE.parent.mkdir(parents=True, exist_ok=True)
+    Image.new("RGB", (32, 32), rgb).save(BACKGROUND_COLOR_IMAGE, "BMP")
 
-    apply_wallpaper("")
+    set_wallpaper_style(WALLPAPER_STYLE_FILL)
+    apply_wallpaper(str(BACKGROUND_COLOR_IMAGE))
 
 
 def set_random_picture_background(directory):
