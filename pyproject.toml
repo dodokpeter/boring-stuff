@@ -10,6 +10,9 @@ dependencies = [
     "pillow>=12.3.0",
     "pyperclip>=1.11.0",
     "pywin32>=312; sys_platform == 'win32'",
+    "xmltodict>=1.0.4",
+    "audio-extract>=0.7.0",
+    "setuptools<80",
 ]
 
 [project.scripts]
@@ -21,6 +24,12 @@ clipsave = "wins.clipsave:main"
 b64d = "devs.base64_clip:main_decode"
 b64e = "devs.base64_clip:main_encode"
 prune-branches = "devs.prune_branches:main"
+lucky = "cases.webs.lucky:main"
+mapit = "cases.maps.mapit:main"
+negative = "cases.pictures.negative:main"
+pinterest = "cases.webs.pinterest:main"
+openwebs = "cases.webs.openwebs:main"
+mp4to3 = "cases.webs.mp4to3:main"
 
 [tool.setuptools]
 packages = []  # Tells it not to look for library packages
