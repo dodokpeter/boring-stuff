@@ -1,5 +1,5 @@
-# lean-setup.ps1
-Write-Host "🚀 Initializing BoringStuff with uv..." -ForegroundColor Cyan
+﻿# lean-setup.ps1
+Write-Host "Initializing BoringStuff with uv..." -ForegroundColor Cyan
 
 $repoPath = Get-Location
 $configDest = Join-Path $HOME ".boring-stuff"
@@ -24,7 +24,7 @@ $configFile = Join-Path $repoPath "BoringStuff.yml"
 $configDestFile = Join-Path $configDest "BoringStuff.yml"
 if ((Test-Path $configFile) -and (-not (Test-Path $configDestFile))) {
     Copy-Item $configFile $configDestFile
-    Write-Host "✅ Configuration ready!"
+    Write-Host "Configuration ready!"
 }
 
 # 3. Add 'boring' shortcut to activate this venv (PowerShell profile only -
@@ -52,7 +52,7 @@ function boring {
 }
 "@
     Add-Content -Path $PROFILE -Value $snippet -Encoding utf8
-    Write-Host "✅ Added 'boring' command - run it (or 'boring 1', same thing) to activate this venv in any new terminal."
+    Write-Host "Added 'boring' command - run it (or 'boring 1', same thing) to activate this venv in any new terminal."
 }
 else {
     Write-Host "'boring' shortcut already present in profile, skipping."

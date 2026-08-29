@@ -76,7 +76,7 @@ def main():
     # 5. Execute
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         for url in args.urls:
-            print(f"🚀 Processing: {url} (Playlist: {args.playlist}, Audio: {args.audio})")
+            print(f"Processing: {url} (Playlist: {args.playlist}, Audio: {args.audio})")
             ydl.download([url])
 
 if __name__ == "__main__":

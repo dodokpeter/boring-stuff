@@ -1,32 +1,44 @@
 #! python3
+# negative - invert every picture in a folder to its negative, saved into a
+# "negative" subfolder alongside the originals (so a second run doesn't
+# invert its own output).
+#
+# negative <folder>
 
+import argparse
+from pathlib import Path
 
 from PIL import Image, ImageOps, UnidentifiedImageError
 
-import sys
-import os
 
+def main(argv=None):
+    parser = argparse.ArgumentParser(description="Invert every picture in a folder to its negative")
+    parser.add_argument("directory", nargs="+", help="folder containing pictures")
+    args = parser.parse_args(argv)
+    directory = Path(" ".join(args.directory))
 
-def main():
-    if len(sys.argv) > 1:
-        # Get directory from command line.
-        directory = ' '.join(sys.argv[1:])
+    output_dir = directory / "negative"
 
-        for x in os.listdir(directory):
-            try:
-                im = Image.open(directory + '/' + x)
-            except (UnidentifiedImageError, OSError):
-                print("Skipping " + x + ": not an image file")
-                continue
+    for path in directory.iterdir():
+        if path.is_dir():
+            continue
 
-            im_invert = ImageOps.invert(im)
-            im_invert.save(directory + '/negative' + x )
-            print("Picture " + x + " was changed to negative")
+        try:
+            im = Image.open(path)
+        except (UnidentifiedImageError, OSError):
+            print(f"Skipping {path.name}: not an image file")
+            continue
 
-    else:
-        print("No parameter was inserted.")
+        # ImageOps.invert only supports "L" (greyscale) and "RGB" - RGBA and
+        # palette ("P") images need converting first, which drops any alpha.
+        if im.mode not in ("L", "RGB"):
+            im = im.convert("RGB")
+
+        im_invert = ImageOps.invert(im)
+        output_dir.mkdir(exist_ok=True)
+        im_invert.save(output_dir / path.name)
+        print(f"Picture {path.name} was changed to negative")
 
 
 if __name__ == "__main__":
     main()
-

@@ -1,25 +1,21 @@
 #! python3
+# mapit - open a Google Maps place page.
+#   mapit               use the address currently on the clipboard
+#   mapit <address>     use the given address
 
-# ideas - check the defined route
-
-
+import argparse
 import webbrowser
-import sys
-import tkinter as tk
 from urllib.parse import quote
 
+import pyperclip
 
-def main():
-    if len(sys.argv) > 1:
-        # Get address from command line.
-        address = ' '.join(sys.argv[1:])
-    else:
-        root = tk.Tk()
-        try:
-            address = root.clipboard_get()
-        except tk.TclError:
-            address = ''
 
+def main(argv=None):
+    parser = argparse.ArgumentParser(description="Open a Google Maps place page")
+    parser.add_argument("address", nargs="*", help="address to look up (default: the clipboard's text)")
+    args = parser.parse_args(argv)
+
+    address = " ".join(args.address) if args.address else (pyperclip.paste() or "")
     address = address.strip()
     if not address:
         print("No address given and the clipboard is empty. Pass an address as an argument instead, e.g. `mapit Bratislava`.")
