@@ -11,8 +11,6 @@ dependencies = [
     "pyperclip>=1.11.0",
     "pywin32>=312; sys_platform == 'win32'",
     "xmltodict>=1.0.4",
-    "audio-extract>=0.7.0",
-    "setuptools<80",
 ]
 
 [project.scripts]
