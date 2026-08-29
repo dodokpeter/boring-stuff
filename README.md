@@ -10,8 +10,8 @@ A collection of Python utility scripts for daily productivity.
     ```
 2.  **Clone & Setup**:
     ```bash
-    git clone https://github.com/youruser/BoringStuff.git
-    cd BoringStuff
+    git clone https://github.com/dodokpeter/boring-stuff.git
+    cd boring-stuff
     # This creates a venv and installs all dependencies in seconds
     uv sync
     ```
@@ -31,24 +31,23 @@ A collection of Python utility scripts for daily productivity.
 ### Python Management
 This project uses **Python 3.12+**. We no longer recommend manual Path edits or Anaconda for this repo.
 * **Virtual Environments:** Managed automatically via `uv` or `venv`.
-* **Dependencies:** All core libraries are tracked in `requirements.txt`.
+* **Dependencies:** All core libraries are tracked in `pyproject.toml`, locked in `uv.lock`.
 
 ### Core Libraries Used:
 | Library | Usage |
 | :--- | :--- |
-| `pyyaml` | Configuration and data parsing |
+| `pyyaml` | Reads/writes `~/.boring-stuff/BoringStuff.yml` |
 | `openpyxl` | Excel automation |
-| `pypdf2` | PDF manipulation |
-| `python-docx` | Word document generation |
-| `pillow` | Image processing |
-| `moviepy` | Video editing |
+| `requests` | HTTP requests (e.g. `pinterest`) |
+| `yt-dlp` | YouTube video/audio downloads |
+| `quickjs` | JS runtime for yt-dlp's challenge-solving |
+| `googlesearch-python` | Scrapes Google results for `lucky` |
+| `pillow` | Image processing (`negative`, `clipsave`, `background`, taskbar icon) |
+| `pyperclip` | Clipboard read/write (`b64d`/`b64e`, `mapit`, `clipsave`) |
+| `pywin32` | Windows-only Shell/taskbar Jump List integration |
+| `xmltodict` | Parses the Pinterest RSS feed |
 
 ---
-
-## 🌐 Selenium Setup (Geckodriver)
-If you use the web automation scripts, you need the Firefox `geckodriver`.
-1.  **Automatic (Recommended):** The scripts now use `webdriver-manager` (added to requirements), so you likely **don't** need to download drivers manually anymore.
-2.  **Manual:** If needed, download from [geckodriver releases](https://github.com/mozilla/geckodriver/releases) and place it in the `bin/` folder of this repo.
 
 ## Additional installations
 
