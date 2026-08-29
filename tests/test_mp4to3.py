@@ -1,6 +1,14 @@
 from pathlib import Path
 
+import pytest
+
 from cases.webs import mp4to3
+
+
+def test_no_folder_exits_with_usage_error():
+    with pytest.raises(SystemExit) as exc_info:
+        mp4to3.main([])
+    assert exc_info.value.code == 2
 
 
 def test_extracts_audio_for_each_mp4_in_folder(tmp_path, monkeypatch):
@@ -12,9 +20,7 @@ def test_extracts_audio_for_each_mp4_in_folder(tmp_path, monkeypatch):
         mp4to3, "extract_audio",
         lambda input_path, output_path: calls.append((str(input_path), output_path)),
     )
-    monkeypatch.setattr(mp4to3.sys, "argv", ["mp4to3", str(tmp_path)])
-
-    mp4to3.main()
+    mp4to3.main([str(tmp_path)])
 
     assert len(calls) == 2
     names = {Path(c[0]).name for c in calls}

@@ -46,8 +46,6 @@ Grouped roughly by payoff; each item names the file it applies to.
   used, and `DIR_PATH` is hardcoded to `c:\repositories\_backgroundPics\`.
 - [cases/maps/mapit.py](cases/maps/mapit.py) - address is not URL-encoded, so
   addresses with `&`, `#` or `+` build a broken Maps URL.
-- [core/python/version.py](core/python/version.py) - prints on import; should be
-  under a `main()`/`__main__` guard or deleted.
 
 ## Dependency and packaging
 
@@ -63,24 +61,6 @@ Grouped roughly by payoff; each item names the file it applies to.
   properly or document that editable-only is intentional.
 - `clean-logs` in `[project.scripts]` points at `scripts.cleanup:run`, which does not
   exist (`scripts/` contains only `hello.py`) - already tracked above, still open.
-
-## Dead / unfinished code
-
-- [core/console/saving.py](core/console/saving.py) and
-  [core/python/version.py](core/python/version.py) are still unused - nothing
-  outside `core/` imports them. `core/configuration/user_conf.py` and
-  `core/console/inputs.py` are the exception: now wired into
-  [scripts/hello.py](scripts/hello.py) and
-  [cases/webs/pinterest.py](cases/webs/pinterest.py) as the single shared config
-  loader (config sprawl fix - was three different mechanisms, now one:
-  `~/.boring-stuff/BoringStuff.yml`).
-- [cases/webs/small.py](cases/webs/small.py) - a comment and nothing else.
-- [cases/git/gitConfig.py](cases/git/gitConfig.py) - `# todo` stub.
-- [cases/webs/mp4to3.py](cases/webs/mp4to3.py) - roughly half the body is leftover
-  copy-paste from the youtube downloader (`home`, `argIndex`, `alsoAudioFile`,
-  `outtmpl`, `albumFolder`, `retries`, `cachedir`, `verbose`, `format`, the `cp65001`
-  codec hack) and is never used. It also parses arguments by joining and slicing
-  `sys.argv` instead of using `argparse`, and shadows the builtin `dir`.
 
 ## Robustness / UX
 
@@ -114,8 +94,6 @@ Grouped roughly by payoff; each item names the file it applies to.
 ## Test gaps
 
 Untested modules: [cases/webs/youtube.py](cases/webs/youtube.py),
-[core/console/saving.py](core/console/saving.py),
-[core/python/version.py](core/python/version.py),
 [cases/wins/setBackgroundPicture.py](cases/wins/setBackgroundPicture.py),
 [cases/git/gitConfig.py](cases/git/gitConfig.py). The pinterest test does not cover
 the single-item feed or an out-of-range index (both real bugs listed above).
@@ -129,5 +107,5 @@ the single-item feed or an out-of-range index (both real bugs listed above).
 - README has a whole Selenium/geckodriver section, but there are no Selenium scripts
   and `webdriver-manager` is not a dependency.
 - README clone URL is still the placeholder `https://github.com/youruser/BoringStuff.git`.
-- [cases/README.md](cases/README.md) does not document `openwebs` config, `hello`'s
-  config file location, or the `clean-logs`/`small`/`gitConfig` stubs.
+- [cases/README.md](cases/README.md) does not document `openwebs` config or the
+  `clean-logs`/`gitConfig` stubs.
