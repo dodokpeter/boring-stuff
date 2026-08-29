@@ -6,7 +6,7 @@ description: House rules and workflow for the boring-stuff repository (C:\Projec
 # Boring Stuff repo conventions
 
 This repo is a personal collection of small Windows automation commands
-(`lucky`, `clipsave`, `b64d`/`b64e`, `prune-branches`, `set-wallpaper`, and
+(`lucky`, `clipsave`, `b64d`/`b64e`, `prune-branches`, `background`, and
 more). The conventions below came out of real bugs hit and fixed while
 building it out - following them saves you from repeating that work.
 

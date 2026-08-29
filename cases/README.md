@@ -7,7 +7,7 @@ hand every time.
 
 ## Add Boring Stuff to Taskbar in windows
 A pinned taskbar shortcut ("B" icon): left-click runs `clipsave`, right-click
-shows a Jump List menu with `b64d`/`b64e`/`set-wallpaper`. Each opens a
+shows a Jump List menu with `b64d`/`b64e`/`background`. Each opens a
 terminal window that shows the result and closes itself after 60 seconds.
 
 One-time setup:
@@ -148,14 +148,18 @@ Timestamp format is `YYYY-MM-dd HH-mm-ss` (e.g. `2026-08-28 09-45-50`).
 Prints a message and exits non-zero if the clipboard is empty or nothing
 could be saved.
 
-#### Set-wallpaper
-Set your desktop background to a random picture from a configured folder.
+#### Background
+Set your desktop background to a random picture from a configured folder, or
+to a solid color from a standard 12-color palette (red, orange, yellow,
+green, cyan, blue, purple, pink, brown, black, white, gray).
 
 Run command:
 
-    set-wallpaper
+    background
+    background green
 
-Configuration (in `~/.boring-stuff/BoringStuff.yml`):
+Configuration (in `~/.boring-stuff/BoringStuff.yml`), only needed for the
+random-picture form:
 
     wallpaper:
       directory: C:\Pictures\Wallpapers
