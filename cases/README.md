@@ -56,6 +56,13 @@ origin via `git push origin --delete` - only ever branches already
 confirmed merged, but a real, visible-to-everyone deletion, so double-check
 the dry-run list first.
 
+### cases/git
+
+#### Gitconfig
+Not available as a command yet - [git/gitConfig.py](git/gitConfig.py) is
+currently just a stub for per-repo git config management. See
+[TODO.md](../TODO.md) for the planned scope.
+
 ### cases/maps
 
 #### Mapit

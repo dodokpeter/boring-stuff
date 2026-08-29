@@ -18,7 +18,7 @@ Running list of things discussed but not yet done. Remove an item once it's buil
 
 # Repository analysis (2026-08-29)
 
-Findings from a full read of the repo. Tests currently pass (40/40).
+Findings from a full read of the repo.
 Grouped roughly by payoff; each item names the file it applies to.
 
 ## Tooling and CI
@@ -30,14 +30,3 @@ Grouped roughly by payoff; each item names the file it applies to.
 
 Untested modules: [cases/webs/youtube.py](cases/webs/youtube.py),
 [cases/git/gitConfig.py](cases/git/gitConfig.py).
-
-## Documentation
-
-- [README.md](README.md) says dependencies are tracked in `requirements.txt` - that
-  file does not exist; everything lives in `pyproject.toml`/`uv.lock`.
-- README's "Core Libraries" table lists `pypdf2`, `python-docx` and `moviepy`, none of
-  which are declared or used anywhere in the repo.
-- README has a whole Selenium/geckodriver section, but there are no Selenium scripts
-  and `webdriver-manager` is not a dependency.
-- README clone URL is still the placeholder `https://github.com/youruser/BoringStuff.git`.
-- [cases/README.md](cases/README.md) does not document the `gitConfig` stub.
