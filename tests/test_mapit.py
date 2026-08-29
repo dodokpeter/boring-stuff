@@ -31,6 +31,24 @@ def test_falls_back_to_clipboard_when_no_args(monkeypatch):
     assert opened == ["https://www.google.com/maps/place/Vienna"]
 
 
+def test_prints_message_and_does_not_open_browser_when_clipboard_is_empty(monkeypatch, capsys):
+    opened = []
+    monkeypatch.setattr(mapit.webbrowser, "open", lambda url: opened.append(url))
+    monkeypatch.setattr(mapit.sys, "argv", ["mapit"])
+
+    class FakeRoot:
+        def clipboard_get(self):
+            raise mapit.tk.TclError("CLIPBOARD selection doesn't exist")
+
+    monkeypatch.setattr(mapit.tk, "Tk", lambda: FakeRoot())
+
+    mapit.main()
+
+    assert opened == []
+    out = capsys.readouterr().out
+    assert "clipboard is empty" in out.lower()
+
+
 def test_url_encodes_special_characters_in_address(monkeypatch):
     opened = []
     monkeypatch.setattr(mapit.webbrowser, "open", lambda url: opened.append(url))

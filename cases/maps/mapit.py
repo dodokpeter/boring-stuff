@@ -15,7 +15,15 @@ def main():
         address = ' '.join(sys.argv[1:])
     else:
         root = tk.Tk()
-        address = root.clipboard_get()
+        try:
+            address = root.clipboard_get()
+        except tk.TclError:
+            address = ''
+
+    address = address.strip()
+    if not address:
+        print("No address given and the clipboard is empty. Pass an address as an argument instead, e.g. `mapit Bratislava`.")
+        return
 
     webbrowser.open('https://www.google.com/maps/place/' + quote(address))
 

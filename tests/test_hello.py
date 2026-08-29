@@ -34,3 +34,13 @@ def test_non_numeric_age_saves_as_string_without_crashing(tmp_path, monkeypatch,
     out = capsys.readouterr().out
     assert "Nice to meet you, Ada" in out
     assert "Next year" not in out
+
+
+def test_output_is_safe_for_legacy_windows_console_codepage(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(user_conf.Path, "home", lambda: tmp_path)
+    answer_with(monkeypatch, "Ada", "Lovelace", "36")
+
+    hello.main()
+
+    out = capsys.readouterr().out
+    out.encode("cp1252")  # raises UnicodeEncodeError if an emoji sneaks back in
