@@ -108,3 +108,25 @@ def test_unknown_color_exits_with_error(capsys):
 
     err = capsys.readouterr().err
     assert "unknown color" in err
+
+
+def test_resolve_color_prefers_the_standard_palette():
+    assert background.resolve_color("green") == "0 128 0"
+
+
+def test_resolve_color_falls_back_to_css3_x11_names():
+    assert background.resolve_color("light blue") == "173 216 230"
+    assert background.resolve_color("steelblue") == "70 130 180"
+
+
+def test_resolve_color_returns_none_for_unknown_name():
+    assert background.resolve_color("not-a-real-color") is None
+
+
+def test_multi_word_color_argument_resolves_via_css3_x11(fake_registry, monkeypatch, capsys):
+    monkeypatch.setattr(background, "get_sys_parameters_info", lambda: (lambda *args: 1))
+
+    background.main(["light", "blue"])
+
+    assert fake_registry == {"Background": "173 216 230"}
+    assert "light blue" in capsys.readouterr().out
