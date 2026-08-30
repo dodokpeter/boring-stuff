@@ -9,7 +9,6 @@ Running list of things discussed but not yet done. Remove an item once it's buil
 - `standup` - summarize your own git commits (yesterday/today) across one or more local repos
 - `newproj <name>` - scaffold a new project (git init, uv init, README, .gitignore) matching personal conventions
 - `findcode <term>` - grep across every repo under a root folder (e.g. `C:\Projects`) at once
-- `jsonfmt` - pretty-print/minify JSON from the clipboard, back to the clipboard
 - `jwtd` - decode a JWT from the clipboard, print/copy header+payload as JSON
 - `pr` command - branch + push + open a PR in one go, now that `gh` CLI is installed and authenticated
 - finish [cases/git/gitConfig.py](cases/git/gitConfig.py) - currently just a `# todo` stub for per-repo git config management
