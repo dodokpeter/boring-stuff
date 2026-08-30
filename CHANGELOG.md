@@ -21,6 +21,11 @@ not backfilled here.
 - `set-wallpaper` renamed to `background`.
 
 ### Added
+- `shared-drive` ensures a `boring-stuff` folder exists inside a configured
+  shared/synced drive folder (e.g. a Google Drive for Desktop mount),
+  creating it if missing. First step toward using such a folder as a plain
+  filesystem path for uploads/edits - no API or OAuth needed since the sync
+  client already mounts it as a real directory.
 - `background <color>` sets a solid desktop color (a standard 12-color
   palette, falling back to CSS3/X11 color names) instead of a random
   picture.
