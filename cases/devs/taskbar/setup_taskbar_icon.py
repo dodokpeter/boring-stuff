@@ -2,8 +2,8 @@
 # One-time setup for a "Boring" taskbar shortcut:
 #   - generates a B-lettered icon
 #   - creates Boring.lnk, whose default target runs clipsave
-#   - registers a Jump List (right-click menu) with b64d/b64e/background as
-#     flat tasks, plus a named "json" category (pretty-print/minify)
+#   - registers a Jump List (right-click menu) with b64d/b64e/background/
+#     json-pretty/json-pretty -m tasks
 #
 # Run: uv run python cases/devs/taskbar/setup_taskbar_icon.py
 # Then: open the folder it prints, right-click Boring.lnk, "Pin to taskbar".
@@ -32,18 +32,8 @@ TASKS = [
     ("Decode base64 (b64d)", "run_b64d.bat", "b64d"),
     ("Encode base64 (b64e)", "run_b64e.bat", "b64e"),
     ("Set background", "run_background.bat", "background"),
-]
-
-# Named Jump List categories, each its own list of (title, .bat, tooltip)
-# entries, shown above the flat TASKS section under their own heading.
-CATEGORIES = [
-    (
-        "json",
-        [
-            ("Pretty-print", "run_json_pretty.bat", "json-pretty"),
-            ("Minify", "run_json_minify.bat", "json-pretty -m"),
-        ],
-    ),
+    ("Pretty-print JSON", "run_json_pretty.bat", "json-pretty"),
+    ("Minify JSON", "run_json_minify.bat", "json-pretty -m"),
 ]
 
 
@@ -117,8 +107,6 @@ def register_jump_list():
     )
     dest_list.SetAppID(APP_ID)
     dest_list.BeginList()
-    for category_name, entries in CATEGORIES:
-        dest_list.AppendCategory(category_name, make_task_collection(entries))
     dest_list.AddUserTasks(make_task_collection(TASKS))
     dest_list.CommitList()
 
@@ -130,10 +118,7 @@ def main():
 
     print(f"Shortcut created: {SHORTCUT_PATH}")
     print("Right-click it in Explorer and choose 'Pin to taskbar' to finish setup.")
-    print(
-        "Left-click on the pinned icon runs clipsave; right-click shows the "
-        "b64d/b64e/background menu plus a json category (pretty-print/minify)."
-    )
+    print("Left-click on the pinned icon runs clipsave; right-click shows the b64d/b64e/background/json-pretty menu.")
 
 
 if __name__ == "__main__":
