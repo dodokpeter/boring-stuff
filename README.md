@@ -2,6 +2,10 @@ Automating the mundane to focus on what matters.
 
 A collection of Python utility scripts for daily productivity.
 
+**Windows only.** Several commands (`background`, the taskbar setup, `clipsave`)
+depend on `pywin32` for Shell/registry integration and won't work on macOS or
+Linux.
+
 ## ⚡ Quick Start (New PC)
 
 1.  **Install uv** (The modern way to manage Python):
@@ -23,6 +27,43 @@ A collection of Python utility scripts for daily productivity.
    ```uv pip install -e .```
    Result: uv will create a shim. Now, as long as your venv is active, you can just type hello.
 
+## Upgrading
+
+```bash
+git pull
+uv sync
+```
+
+Then check [CHANGELOG.md](CHANGELOG.md) for anything under **Breaking** -
+if a command you use (or have pinned to the taskbar) was renamed or
+removed, that's where you'll find out. If a taskbar-registered command
+changed, re-run the taskbar setup to pick it up:
+
+```bash
+uv run python cases/devs/taskbar/setup_taskbar_icon.py
+```
+
+## Uninstalling
+
+```bash
+uv run python cases/devs/taskbar/setup_taskbar_icon.py --uninstall
+```
+
+removes the registered Jump List, the pinned shortcut, and the generated
+icon. Windows has no supported API to un-pin a taskbar icon
+programmatically, so if it's still pinned, right-click it and choose
+"Unpin from taskbar" to finish.
+
+This does **not** touch `~/.boring-stuff/BoringStuff.yml` - that's your
+actual config (Pinterest board, wallpaper folder, etc.), and removing it is
+a separate decision. To remove everything:
+
+```powershell
+Remove-Item -Recurse -Force $HOME\.boring-stuff   # or delete the folder in Explorer
+```
+
+Then delete the cloned repo folder (and its `.venv`) however you'd remove
+any other folder.
 
 ---
 
@@ -77,6 +118,14 @@ If the logs say challenge solving failed even after the steps above, it's time t
 Run `hello` in your terminal to verify the installation.
 
 * [Command Reference](./cases/README.md) - Full list of available automation scripts.
+* [CHANGELOG.md](CHANGELOG.md) - what changed, and what's Breaking.
+
+## Versioning
+
+There's no built release artifact yet (see [CHANGELOG.md](CHANGELOG.md) -
+distribution is git-clone based for now), so a version tag is just a
+label: it only ever gets created from a `master` commit whose CI (`lint`
+and both `test` matrix legs) is green.
 
 
 

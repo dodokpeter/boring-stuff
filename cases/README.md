@@ -5,6 +5,9 @@ take care of repetitive, everyday tasks - clipboard conversions, quick web
 lookups, image tweaks, downloads, and more - so you don't have to do them by
 hand every time.
 
+**Windows only.** `background`, this taskbar setup, and `clipsave` depend on
+`pywin32` and won't work on macOS or Linux.
+
 ## Add Boring Stuff to Taskbar in windows
 A pinned taskbar shortcut ("B" icon): left-click runs `clipsave`, right-click
 shows a Jump List menu with `b64d`/`b64e`/`background`/`json-pretty`
@@ -18,7 +21,17 @@ One-time setup:
 
 Then, in the folder it prints (`%USERPROFILE%\.boring-stuff`), right-click
 `Boring.lnk` and choose "Pin to taskbar". Safe to re-run the setup script any
-time - it refreshes the icon and the Jump List tasks in place.
+time - it refreshes the icon and the Jump List tasks in place (e.g. after
+pulling an update that renames or adds a taskbar-registered command).
+
+To remove it:
+
+    uv run python cases/devs/taskbar/setup_taskbar_icon.py --uninstall
+
+Removes the Jump List registration, the shortcut, and the icon (leaves your
+`BoringStuff.yml` config untouched). Right-click the taskbar icon and choose
+"Unpin from taskbar" afterward - Windows doesn't expose an API to do that
+part programmatically.
 
 ## Available scripts
 

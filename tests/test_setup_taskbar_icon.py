@@ -90,3 +90,43 @@ def test_register_jump_list_runs_without_error():
     setup_taskbar_icon.create_main_shortcut()
 
     setup_taskbar_icon.register_jump_list()
+
+
+def test_uninstall_removes_shortcut_and_icon_files():
+    setup_taskbar_icon.generate_icon()
+    setup_taskbar_icon.create_main_shortcut()
+    assert setup_taskbar_icon.ICON_PATH.exists()
+    assert setup_taskbar_icon.SHORTCUT_PATH.exists()
+
+    setup_taskbar_icon.uninstall()
+
+    assert not setup_taskbar_icon.ICON_PATH.exists()
+    assert not setup_taskbar_icon.SHORTCUT_PATH.exists()
+
+
+def test_uninstall_does_not_touch_boringstuff_yml(isolated_paths):
+    isolated_paths.mkdir(parents=True, exist_ok=True)
+    config_file = isolated_paths / "BoringStuff.yml"
+    config_file.write_text("app: boring-stuff\n", encoding="utf-8")
+
+    setup_taskbar_icon.generate_icon()
+    setup_taskbar_icon.create_main_shortcut()
+
+    setup_taskbar_icon.uninstall()
+
+    assert config_file.exists()
+
+
+def test_uninstall_runs_without_error_when_nothing_was_installed():
+    # Safe to call even if setup was never run - no files to delete, and
+    # DeleteList on an app id with no registered Jump List is a no-op.
+    setup_taskbar_icon.uninstall()
+
+
+def test_main_uninstall_flag_calls_uninstall(monkeypatch):
+    called = []
+    monkeypatch.setattr(setup_taskbar_icon, "uninstall", lambda: called.append(True))
+
+    setup_taskbar_icon.main(["--uninstall"])
+
+    assert called == [True]

@@ -8,7 +8,10 @@
 # Run: uv run python cases/devs/taskbar/setup_taskbar_icon.py
 # Then: open the folder it prints, right-click Boring.lnk, "Pin to taskbar".
 # Safe to re-run any time to refresh the icon or the Jump List tasks.
+#
+# Run with --uninstall to remove the shortcut, icon, and Jump List again.
 
+import argparse
 import os
 from pathlib import Path
 
@@ -111,7 +114,36 @@ def register_jump_list():
     dest_list.CommitList()
 
 
-def main():
+def uninstall():
+    """Remove the registered Jump List, the pinned shortcut, and the
+    generated icon. Deliberately does not touch BoringStuff.yml - removing
+    someone's actual config (Pinterest board, wallpaper folder, etc.) is a
+    separate decision, not a side effect of removing a taskbar shortcut.
+    Windows has no supported API to un-pin a taskbar icon programmatically,
+    so that step stays manual."""
+    dest_list = pythoncom.CoCreateInstance(
+        shell.CLSID_DestinationList, None, pythoncom.CLSCTX_INPROC_SERVER, shell.IID_ICustomDestinationList
+    )
+    dest_list.DeleteList(APP_ID)
+
+    for path in (SHORTCUT_PATH, ICON_PATH):
+        path.unlink(missing_ok=True)
+
+    print("Removed the Jump List registration, shortcut, and icon.")
+    print("If it's still pinned, right-click it in the taskbar and choose 'Unpin from taskbar' to finish removing it.")
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description="Set up (or remove) the Boring taskbar shortcut")
+    parser.add_argument(
+        "--uninstall", action="store_true", help="remove the shortcut, icon, and Jump List instead of installing them"
+    )
+    args = parser.parse_args(argv)
+
+    if args.uninstall:
+        uninstall()
+        return
+
     generate_icon()
     create_main_shortcut()
     register_jump_list()
