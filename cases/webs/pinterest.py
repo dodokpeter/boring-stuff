@@ -4,6 +4,7 @@
 import random
 import sys
 import webbrowser
+from xml.parsers.expat import ExpatError
 
 import requests
 import xmltodict
@@ -18,11 +19,19 @@ def main():
         print(e)
         sys.exit(1)
 
-    response = requests.get(url, "xml")
-    response.raise_for_status()
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Could not fetch the Pinterest board RSS feed: {e}")
+        sys.exit(1)
 
-    # xml response parse it
-    doc = xmltodict.parse(response.content)
+    try:
+        doc = xmltodict.parse(response.content)
+    except ExpatError as e:
+        print(f"Pinterest board RSS feed is not valid XML: {e}")
+        sys.exit(1)
+
     items = doc["rss"]["channel"]["item"]
     if isinstance(items, dict):
         # xmltodict parses a single <item> as a dict rather than a list
