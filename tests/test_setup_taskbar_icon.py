@@ -45,10 +45,21 @@ def test_make_link_sets_description_as_hover_tooltip():
     assert link.GetDescription() == "background"
 
 
-def test_command_name_strips_run_prefix_and_bat_suffix():
-    assert setup_taskbar_icon.command_name("run_background.bat") == "background"
-    assert setup_taskbar_icon.command_name("run_b64d.bat") == "b64d"
-    assert setup_taskbar_icon.command_name("run_b64e.bat") == "b64e"
+def test_make_task_collection_builds_one_link_per_entry():
+    # IObjectArray.GetAt(index, IID) segfaults in this pywin32 environment
+    # (reproduced outside pytest too), so - like register_jump_list below -
+    # this only checks what can safely be introspected: the item count.
+    # Each entry's link content (path/args/description/title) is covered by
+    # make_link's and set_title's own tests above.
+    setup_taskbar_icon.generate_icon()
+    array = setup_taskbar_icon.make_task_collection(
+        [
+            ("Pretty-print", "run_json_pretty.bat", "json-pretty"),
+            ("Minify", "run_json_minify.bat", "json-pretty -m"),
+        ]
+    )
+
+    assert array.GetCount() == 2
 
 
 def test_create_main_shortcut_writes_lnk_with_app_id():
