@@ -213,6 +213,24 @@ random-picture form:
     wallpaper:
       directory: C:\Pictures\Wallpapers
 
+#### Shared-drive
+Make sure a `boring-stuff` folder exists inside a shared/synced drive folder
+(e.g. a Google Drive for Desktop mount), creating it if it isn't there yet.
+Works as a plain filesystem path - no Google API or OAuth setup needed,
+since the desktop sync client already mounts the folder as a real
+directory. First prompted config value only needs to be entered once.
+
+Run command:
+
+    shared-drive
+
+Configuration (in `~/.boring-stuff/BoringStuff.yml`) - prompted for and
+saved automatically on first run if missing:
+
+    drive:
+      directory:
+        boring-stuff: G:\.shortcut-targets-by-id\<id>\Dodo
+
 ### scripts
 
 #### Hello
