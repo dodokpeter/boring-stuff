@@ -17,8 +17,17 @@ def select_from_list(input_message, list_of_choices, with_no_selection=False):
 
 
 def ask_string_value(message, default):
-    user_input = input(message + " (default = " + default + "'): ")
-    if user_input == "":
-        return default
+    """Prompt for a string value. If `default` is None, the value is
+    required: the "(default = ...)" suffix is omitted, and the prompt
+    repeats until a non-empty answer is given."""
+    if default is None:
+        prompt = f"{message}: "
     else:
-        return user_input
+        prompt = f"{message} (default = {default}): "
+
+    while True:
+        user_input = input(prompt)
+        if user_input:
+            return user_input
+        if default is not None:
+            return default

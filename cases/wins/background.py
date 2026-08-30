@@ -15,12 +15,13 @@ import os
 import random
 import re
 import struct
+import sys
 import winreg
 from pathlib import Path
 
 from PIL import Image, ImageColor
 
-from core.configuration.user_conf import load_config
+from core.configuration.user_conf import MissingConfigError, load_config_value
 
 SPI_SETDESKWALLPAPER = 20
 
@@ -115,6 +116,18 @@ def set_solid_color_background(rgb):
     apply_wallpaper(str(BACKGROUND_COLOR_IMAGE))
 
 
+def validate_wallpaper_directory(value):
+    """Raise ValueError with a clear message if `value` isn't a usable
+    wallpaper directory - used to reject a bad answer before it gets
+    persisted to config (a typo'd or empty directory would otherwise only
+    fail later, inside set_random_picture_background)."""
+    directory = Path(value)
+    if not directory.is_dir():
+        raise ValueError(f"'{value}' is not a directory.")
+    if not any(directory.iterdir()):
+        raise ValueError(f"'{value}' is empty - add some pictures to it first.")
+
+
 def set_random_picture_background(directory):
     wallpaper_path = os.path.join(directory, random.choice(os.listdir(directory)))
     print(wallpaper_path)
@@ -148,8 +161,19 @@ def main(argv=None):
         set_solid_color_background(rgb)
         return
 
-    config = load_config(None)
-    directory = config["wallpaper"]["directory"]
+    try:
+        directory = load_config_value(
+            None,
+            "Wallpaper directory",
+            None,
+            "wallpaper",
+            "directory",
+            validate=validate_wallpaper_directory,
+        )
+    except MissingConfigError as e:
+        print(e)
+        sys.exit(1)
+
     set_random_picture_background(directory)
 
 

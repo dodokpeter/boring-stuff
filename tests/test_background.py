@@ -46,11 +46,7 @@ def test_picks_a_random_wallpaper_and_applies_it(tmp_path, monkeypatch, fake_spi
     (directory / "one.jpg").write_bytes(b"")
     (directory / "two.jpg").write_bytes(b"")
 
-    monkeypatch.setattr(
-        background,
-        "load_config",
-        lambda name: {"wallpaper": {"directory": str(directory)}},
-    )
+    monkeypatch.setattr(background, "load_config_value", lambda *args, **kwargs: str(directory))
     monkeypatch.setattr(background.random, "choice", lambda seq: sorted(seq)[0])
 
     style_calls = []
@@ -75,11 +71,63 @@ def test_set_wallpaper_fit_style_writes_fit_registry_values(fake_registry):
     assert fake_registry == {"WallpaperStyle": "6", "TileWallpaper": "0"}
 
 
-def test_raises_when_directory_not_configured(monkeypatch):
-    monkeypatch.setattr(background, "load_config", lambda name: {})
+def test_prompts_and_persists_directory_when_not_configured(tmp_path, monkeypatch, fake_spi):
+    directory = tmp_path / "wallpapers"
+    directory.mkdir()
+    (directory / "one.jpg").write_bytes(b"")
+    monkeypatch.setattr(background.random, "choice", lambda seq: sorted(seq)[0])
 
-    with pytest.raises(KeyError):
+    calls = []
+
+    def fake_load_config_value(config_name, message, default, *keys, validate=None):
+        calls.append((config_name, message, default, keys))
+        if validate is not None:
+            validate(str(directory))
+        return str(directory)
+
+    monkeypatch.setattr(background, "load_config_value", fake_load_config_value)
+
+    background.main([])
+
+    assert calls == [(None, "Wallpaper directory", None, ("wallpaper", "directory"))]
+
+    assert len(fake_spi) == 1
+    action, _param, path, _flags = fake_spi[0]
+    assert action == background.SPI_SETDESKWALLPAPER
+    assert Path(path) == directory / "one.jpg"
+
+
+def test_exits_cleanly_when_config_cannot_be_obtained(monkeypatch, capsys):
+    def raise_missing(*args, **kwargs):
+        raise background.MissingConfigError("Wallpaper directory is not configured, and no terminal is attached.")
+
+    monkeypatch.setattr(background, "load_config_value", raise_missing)
+
+    with pytest.raises(SystemExit):
         background.main([])
+
+    assert "not configured" in capsys.readouterr().out
+
+
+def test_validate_wallpaper_directory_rejects_missing_path(tmp_path):
+    with pytest.raises(ValueError):
+        background.validate_wallpaper_directory(str(tmp_path / "nope"))
+
+
+def test_validate_wallpaper_directory_rejects_empty_directory(tmp_path):
+    empty_dir = tmp_path / "empty"
+    empty_dir.mkdir()
+
+    with pytest.raises(ValueError):
+        background.validate_wallpaper_directory(str(empty_dir))
+
+
+def test_validate_wallpaper_directory_accepts_directory_with_a_file(tmp_path):
+    ok_dir = tmp_path / "ok"
+    ok_dir.mkdir()
+    (ok_dir / "pic.jpg").write_bytes(b"")
+
+    background.validate_wallpaper_directory(str(ok_dir))  # does not raise
 
 
 def test_color_argument_generates_solid_color_image_and_applies_it(
