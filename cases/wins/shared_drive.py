@@ -9,7 +9,7 @@
 # Configuration (in ~/.boring-stuff/BoringStuff.yml):
 #   drive:
 #     directory:
-#       boring-stuff: G:\.shortcut-targets-by-id\<id>\Dodo
+#       boring-stuff: G:\.shortcut-targets-by-id\<id>
 
 import sys
 from pathlib import Path
