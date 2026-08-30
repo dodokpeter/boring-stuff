@@ -30,6 +30,18 @@ a new config file or format - this repo used to have three different config
 mechanisms before they got consolidated into this one, and it was a real
 mess to unwind.
 
+If a script *requires* a config value to run (not just an optional
+preference with a working default, like `openwebs`'s groups), use
+`load_config_value(config_name, message, default, *config_keys, validate=...)`
+instead of indexing the config dict directly - it supports a nested key
+path (`"wallpaper", "directory"`), prompts for and persists a missing value
+instead of raising a raw `KeyError`, and raises `MissingConfigError` if the
+prompt itself can't be completed (no terminal attached, or cancelled),
+which the script should catch and turn into a message + non-zero exit. See
+`background.py`/`pinterest.py` for the pattern, including the optional
+`validate` callback (`background`'s wallpaper directory is checked to
+actually exist and be non-empty before it's saved).
+
 ## Adding or fixing a command
 
 Every command is a real console-script entry point in `pyproject.toml`,
@@ -69,6 +81,15 @@ gh pr create --title "..." --body "..."
 gh pr checks <N> --repo dodokpeter/boring-stuff --watch
 ```
 
+For a non-trivial or ambiguous feature (open design questions, multiple
+reasonable approaches), file a GitHub issue on
+`https://github.com/dodokpeter/boring-stuff/issues` first, capturing the
+proposal, the decisions made, and explicit out-of-scope items - then open
+a PR that closes it. This has been worth it twice already: a reviewer
+(human or otherwise) can comment on the issue and get it updated before
+any code is written, and "explicitly out of scope" prevents the same
+question from being silently re-decided differently in a later PR.
+
 A few things that will trip you up if you don't know them:
 
 - **Sync before branching, every time.** PRs in this repo often get merged
@@ -88,8 +109,26 @@ A few things that will trip you up if you don't know them:
   back to the full path: `"C:\Program Files\GitHub CLI\gh.exe"`.
 - **Wait for CI to go green before calling something done.** `gh pr checks
   <N> --repo dodokpeter/boring-stuff --watch` blocks until the checks
-  resolve. `master` has branch protection requiring the `test` check to
-  pass, so an unmerged PR with failing CI can't land anyway.
+  resolve. `master` has branch protection requiring `lint`,
+  `test (ubuntu-latest)`, and `test (windows-latest)` to pass, so an
+  unmerged PR with failing CI can't land anyway.
+- **A stacked PR (branched off another unmerged branch) doesn't get CI
+  until it targets `master`.** `tests.yml` only triggers on PRs into
+  `master`, so retarget with `gh pr edit <N> --base master` once the
+  dependency merges - but a base-branch edit alone doesn't fire a new
+  `pull_request` event, so CI still won't run until you also
+  `gh pr close <N>` + `gh pr reopen <N>` (or push a new commit) to trigger
+  it.
+- **If you ever change job names or add a matrix to `tests.yml`,
+  update branch protection's required status checks to match.** GitHub
+  Actions renames matrix jobs in the checks list (e.g. `test` ->
+  `test (ubuntu-latest)` / `test (windows-latest)`), but branch protection
+  keeps whatever check name string it already had configured. A mismatch
+  means every future PR shows unmergeable/stuck-pending forever, waiting
+  on a check name that will never post again - this happened for real
+  after adding the OS matrix, and needed
+  `gh api -X PATCH repos/.../branches/master/protection/required_status_checks`
+  to fix.
 
 ## Line endings
 
@@ -113,6 +152,14 @@ browser.
 For anything that only makes sense on Windows (`pywin32`, `tkinter`), guard
 the test module with `pytest.importorskip(...)` so it skips cleanly on
 Linux CI instead of erroring at collection time.
+
+`IObjectArray.GetAt(index, IID)` (reading an item back out of a Jump
+List/COM object array) reliably segfaults the whole interpreter in this
+pywin32 setup - reproduced standalone outside pytest too, not a test-only
+quirk. Don't try to introspect a built `IObjectArray`'s contents that way;
+`GetCount()` is safe, and per-item content is better covered by testing
+the smaller functions (`make_link`, `set_title`) that built it, the way
+`tests/test_setup_taskbar_icon.py` does.
 
 Mocked unit tests are necessary but not sufficient - wherever it's
 feasible and safe, also verify the real thing works: run the actual
@@ -171,6 +218,34 @@ convenient.
 soon as it's actually fixed, rather than letting resolved items or
 references to since-deleted files pile up.
 
+## Distribution and releases
+
+Distribution is git-clone based for now (`git clone` -> `uv sync` ->
+`setup.ps1`; upgrade is `git pull` -> `uv sync`) - no PyPI package, no
+built release artifact. That's an explicit, revisit-later decision, not an
+oversight; don't add PyPI publishing or artifact-building tooling without
+that decision being reopened first.
+
+`CHANGELOG.md` (Keep a Changelog style) tracks changes from when it was
+added onward - it was never backfilled against older history, so don't
+try to reconstruct entries for anything before it existed. **Any command
+rename or removal is a Breaking change and must get its own line under
+that heading.** This isn't optional politeness: renaming `set-wallpaper`
+to `background` without flagging it anywhere silently broke the live
+taskbar Jump List (it kept pointing at a `.bat` file that no longer
+existed) until `setup_taskbar_icon.py` was re-run - exactly the kind of
+damage the Breaking convention exists to prevent for the next rename.
+
+A version tag only ever gets created from a `master` commit whose CI
+(`lint` + both `test` legs) is green - there's no automated release
+workflow enforcing this since there's no artifact to gate yet, so it's on
+whoever's tagging to check.
+
+`setup_taskbar_icon.py --uninstall` removes the registered Jump List, the
+pinned shortcut, and the generated icon, but deliberately never touches
+`BoringStuff.yml` - removing someone's actual config is a separate
+decision from removing a taskbar shortcut, not a side effect of it.
+
 ## Judgment calls worth knowing about
 
 - **Stay scoped to what's asked.** If you're fixing bugs from one named
@@ -191,3 +266,13 @@ references to since-deleted files pile up.
   before doing for real, even if the feature itself was explicitly
   requested. If you do touch real state while verifying something, clean
   up immediately after.
+- **When verifying against the real `~/.boring-stuff/BoringStuff.yml`**
+  (as opposed to a `tmp_path`-isolated test), copy it aside first and
+  restore the exact original content afterward, even across multiple
+  verification steps - don't leave it half-modified or trust that the
+  next step will happen to put back what the first step removed.
+- **Repo-level settings changes - branch protection, git tags - also
+  warrant a check-in first**, same as the real-state category above, even
+  though they're not code. They're immediately live and visible (unlike a
+  PR, which is reviewable before it lands), and a tag in particular is
+  meant to be a stable, semi-permanent marker.
