@@ -2,8 +2,8 @@
 # One-time setup for a "Boring" taskbar shortcut:
 #   - generates a B-lettered icon
 #   - creates Boring.lnk, whose default target runs clipsave
-#   - registers a Jump List (right-click menu) with b64d/b64e/background
-#     tasks
+#   - registers a Jump List (right-click menu) with b64d/b64e/background/
+#     json-pretty/json-pretty -m tasks
 #
 # Run: uv run python cases/devs/taskbar/setup_taskbar_icon.py
 # Then: open the folder it prints, right-click Boring.lnk, "Pin to taskbar".
@@ -27,11 +27,13 @@ ICON_PATH = DATA_DIR / "boring.ico"
 SHORTCUT_PATH = DATA_DIR / "Boring.lnk"
 CMD_EXE = r"C:\Windows\System32\cmd.exe"
 
-# (display title in the Jump List, .bat file to run)
+# (display title in the Jump List, .bat file to run, hover-tooltip command)
 TASKS = [
-    ("Decode base64 (b64d)", "run_b64d.bat"),
-    ("Encode base64 (b64e)", "run_b64e.bat"),
-    ("Set background", "run_background.bat"),
+    ("Decode base64 (b64d)", "run_b64d.bat", "b64d"),
+    ("Encode base64 (b64e)", "run_b64e.bat", "b64e"),
+    ("Set background", "run_background.bat", "background"),
+    ("Pretty-print JSON", "run_json_pretty.bat", "json-pretty"),
+    ("Minify JSON", "run_json_minify.bat", "json-pretty -m"),
 ]
 
 
@@ -69,12 +71,6 @@ def make_link(bat_name, description=None):
     return link
 
 
-def command_name(bat_name):
-    """ "run_background.bat" -> "background" - the actual CLI command a
-    task's .bat file runs, for use as its Jump List hover tooltip."""
-    return bat_name.removeprefix("run_").removesuffix(".bat")
-
-
 def set_title(link, title):
     store = link.QueryInterface(propsys.IID_IPropertyStore)
     store.SetValue(pscon.PKEY_Title, propsys.PROPVARIANTType(title))
@@ -94,21 +90,24 @@ def create_main_shortcut():
     store.Commit()
 
 
-def register_jump_list():
+def make_task_collection(entries):
     collection = pythoncom.CoCreateInstance(
         shell.CLSID_EnumerableObjectCollection, None, pythoncom.CLSCTX_INPROC_SERVER, shell.IID_IObjectCollection
     )
-    for title, bat_name in TASKS:
-        task_link = make_link(bat_name, description=command_name(bat_name))
+    for title, bat_name, description in entries:
+        task_link = make_link(bat_name, description=description)
         set_title(task_link, title)
         collection.AddObject(task_link)
+    return collection.QueryInterface(shell.IID_IObjectArray)
 
+
+def register_jump_list():
     dest_list = pythoncom.CoCreateInstance(
         shell.CLSID_DestinationList, None, pythoncom.CLSCTX_INPROC_SERVER, shell.IID_ICustomDestinationList
     )
     dest_list.SetAppID(APP_ID)
     dest_list.BeginList()
-    dest_list.AddUserTasks(collection.QueryInterface(shell.IID_IObjectArray))
+    dest_list.AddUserTasks(make_task_collection(TASKS))
     dest_list.CommitList()
 
 
@@ -119,7 +118,7 @@ def main():
 
     print(f"Shortcut created: {SHORTCUT_PATH}")
     print("Right-click it in Explorer and choose 'Pin to taskbar' to finish setup.")
-    print("Left-click on the pinned icon runs clipsave; right-click shows the b64d/b64e/background menu.")
+    print("Left-click on the pinned icon runs clipsave; right-click shows the b64d/b64e/background/json-pretty menu.")
 
 
 if __name__ == "__main__":
