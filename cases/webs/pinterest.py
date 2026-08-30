@@ -2,19 +2,22 @@
 # Choose one random picture from Pinterest board
 
 import random
+import sys
 import webbrowser
 
 import requests
 import xmltodict
 
-from core.configuration.user_conf import load_config
+from core.configuration.user_conf import MissingConfigError, load_config_value
 
 
 def main():
-    config = load_config(None)
+    try:
+        url = load_config_value(None, "Pinterest board RSS URL", None, "pinterest", "randomBoard")
+    except MissingConfigError as e:
+        print(e)
+        sys.exit(1)
 
-    # obtain url of pinterest board
-    url = config["pinterest"]["randomBoard"]
     response = requests.get(url, "xml")
     response.raise_for_status()
 

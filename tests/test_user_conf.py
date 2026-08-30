@@ -56,3 +56,63 @@ def test_load_config_value_prompts_and_persists_when_missing(monkeypatch):
 
     assert result == "typed-value"
     assert user_conf.load_config(None)["greeting"] == "typed-value"
+
+
+def test_load_config_value_supports_a_nested_key_path(monkeypatch):
+    monkeypatch.setattr(user_conf, "ask_string_value", lambda message, default: "C:/Pictures")
+
+    result = user_conf.load_config_value(None, "Wallpaper directory?", None, "wallpaper", "directory")
+
+    assert result == "C:/Pictures"
+    assert user_conf.load_config(None)["wallpaper"]["directory"] == "C:/Pictures"
+
+
+def test_load_config_value_nested_returns_existing_without_prompting(monkeypatch):
+    user_conf.save_config(None, {"wallpaper": {"directory": "C:/Existing"}})
+
+    def fail_if_called(*args, **kwargs):
+        raise AssertionError("should not prompt when value already exists")
+
+    monkeypatch.setattr(user_conf, "ask_string_value", fail_if_called)
+
+    result = user_conf.load_config_value(None, "Wallpaper directory?", None, "wallpaper", "directory")
+
+    assert result == "C:/Existing"
+
+
+def test_load_config_value_requires_at_least_one_key():
+    with pytest.raises(ValueError):
+        user_conf.load_config_value(None, "Value?", None)
+
+
+def test_load_config_value_validate_rejects_then_accepts(monkeypatch):
+    answers = iter(["bad", "good"])
+    monkeypatch.setattr(user_conf, "ask_string_value", lambda message, default: next(answers))
+
+    def validate(value):
+        if value != "good":
+            raise ValueError(f"'{value}' is not good")
+
+    result = user_conf.load_config_value(None, "Value?", None, "key", validate=validate)
+
+    assert result == "good"
+
+
+def test_load_config_value_wraps_eof_error(monkeypatch):
+    def raise_eof(message, default):
+        raise EOFError()
+
+    monkeypatch.setattr(user_conf, "ask_string_value", raise_eof)
+
+    with pytest.raises(user_conf.MissingConfigError):
+        user_conf.load_config_value(None, "Value?", None, "key")
+
+
+def test_load_config_value_wraps_keyboard_interrupt(monkeypatch):
+    def raise_interrupt(message, default):
+        raise KeyboardInterrupt()
+
+    monkeypatch.setattr(user_conf, "ask_string_value", raise_interrupt)
+
+    with pytest.raises(user_conf.MissingConfigError):
+        user_conf.load_config_value(None, "Value?", None, "key")
