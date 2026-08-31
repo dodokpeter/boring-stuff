@@ -37,11 +37,30 @@ not backfilled here.
   issue #50 for the ruled-out trigger mechanisms (Jump List item, taskbar
   icon, shortcut icon all refuse the drop - a real Explorer folder window
   is the only one that works). Also available from the taskbar Jump List.
-- `shared-drive` ensures a `boring-stuff` folder exists inside a configured
-  shared/synced drive folder (e.g. a Google Drive for Desktop mount),
-  creating it if missing. First step toward using such a folder as a plain
-  filesystem path for uploads/edits - no API or OAuth needed since the sync
-  client already mounts it as a real directory.
+- `shared-drive` ensures a "share" folder exists inside the configured
+  cloud folder (e.g. a Google Drive for Desktop mount), creating it if
+  missing - no API or OAuth needed since the sync client already mounts it
+  as a real directory. Uses the shared `cloud.folder`/`cloud.share` config
+  (see `move-to`, below) - no separate config of its own.
+- `move-to -s`/`move-to -o` moves a file or folder to the configured cloud
+  share/output folder (`<cloud.folder>/<cloud.share>` or
+  `<cloud.folder>/<cloud.output>`) - plain `shutil.move`, no Drive
+  API/OAuth. Also available from the new File Explorer right-click menu
+  (files and folders) - see below. See issue #58.
+- A "Boring" File Explorer right-click submenu
+  (`cases/devs/explorer_menu/setup_explorer_menu.py`, registered under
+  `HKCU` so no admin elevation is needed): `move-to` (share/output) on
+  every file and folder, plus `negative`/`mp4to3`/`email-extract` on
+  their relevant file types only. Hidden under "Show more options" on
+  Windows 11 by default (a platform limitation, not a bug). See issue #58.
+- `negative` and `mp4to3` now also accept a single file (not just a
+  folder) - `negative <picture>` inverts just that one picture,
+  `mp4to3 <file.mp4>` extracts just that one file's audio - so the new
+  Explorer right-click menu can act on a single clicked file.
+- `email-extract <file.msg>` (a new optional argument) moves that file
+  into the drop folder before processing it - what the Explorer
+  right-click menu uses; still defaults to processing whatever's already
+  in the drop folder when no argument is given.
 - `background <color>` sets a solid desktop color (a standard 12-color
   palette, falling back to CSS3/X11 color names) instead of a random
   picture.
@@ -54,10 +73,10 @@ not backfilled here.
   `-t<langcode>` downloads a transcript into `<content-folder>` and is
   repeatable (e.g. `-ten -tsk` for English + Slovak); a language that
   isn't available is reported without aborting the rest of the download.
-  `-c` moves the content folder to `<cloud.folder>/output` after a
-  successful download - `cloud.folder` is a new config value (plain local
-  path, e.g. a Google Drive for Desktop mount - no API/OAuth), same
-  pattern as `shared-drive`'s `drive.directory`. See issue #55.
+  `-c` moves the content folder to `<cloud.folder>/<cloud.output>` after
+  a successful download - the same shared cloud config `move-to` uses
+  (plain local path, e.g. a Google Drive for Desktop mount - no
+  API/OAuth). See issue #55.
 - `json-pretty` (and `json-pretty --minify`) pretty-prints or minifies the
   clipboard's JSON text in place.
 - Scripts with a required config value (`background`'s wallpaper directory,

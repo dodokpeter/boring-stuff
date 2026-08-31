@@ -22,6 +22,7 @@
 #   outlook:
 #     dropFolderName: emails-to-process
 
+import argparse
 import hashlib
 import re
 import shutil
@@ -35,6 +36,7 @@ import requests
 from PIL import Image
 
 from core.configuration.user_conf import MissingConfigError, load_config_value
+from core.files import unique_path
 from core.stats import record_usage
 
 DEFAULT_DROP_FOLDER_NAME = "emails-to-process"
@@ -78,18 +80,6 @@ def extract_email_identity(msg):
     sent_date_str = msg.date.strftime("%Y-%m-%d") if msg.date else "unknown-date"
     subject = sanitize_filename_part(msg.subject or "no-subject")
     return sender_name, sent_date_str, subject
-
-
-def unique_path(path):
-    """Same collision-avoidance scheme as clipsave.py's unique_path."""
-    if not path.exists():
-        return path
-    n = 1
-    while True:
-        candidate = path.with_name(f"{path.stem} ({n}){path.suffix}")
-        if not candidate.exists():
-            return candidate
-        n += 1
 
 
 def save_bytes_if_new(data, output_dir, base_name, suffix):
@@ -234,8 +224,17 @@ def process_message_file(msg_path, output_dir):
         msg.close()
 
 
-def main():
+def main(argv=None):
     record_usage("email-extract")
+    parser = argparse.ArgumentParser(description="Process .msg email files from the configured drop folder")
+    parser.add_argument(
+        "msg_path",
+        nargs="?",
+        help="a .msg file to move into the drop folder before processing (e.g. from the Explorer context menu) "
+        "- optional, otherwise just processes whatever's already in the drop folder",
+    )
+    args = parser.parse_args(argv)
+
     try:
         folder_name = load_config_value(
             None,
@@ -257,6 +256,15 @@ def main():
     drop_dir.mkdir(parents=True, exist_ok=True)
     output_dir.mkdir(parents=True, exist_ok=True)
     processed_dir.mkdir(parents=True, exist_ok=True)
+
+    if args.msg_path:
+        source = Path(args.msg_path)
+        if not source.exists():
+            print(f"'{source}' does not exist.")
+            sys.exit(1)
+        target = unique_path(drop_dir / source.name)
+        shutil.move(str(source), str(target))
+        print(f"Moved into drop folder: {target.name}")
 
     message_files = find_message_files(drop_dir)
     if not message_files:

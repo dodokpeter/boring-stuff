@@ -165,30 +165,29 @@ def test_move_audio_files_leaves_video_file_alone(tmp_path):
 # --- move_to_cloud ---
 
 
-def test_move_to_cloud_moves_folder_under_output_subfolder(tmp_path):
+def test_move_to_cloud_moves_folder_under_given_subfolder(tmp_path):
     content_folder = tmp_path / "output" / "My Video"
     content_folder.mkdir(parents=True)
     (content_folder / "My Video.mp4").write_bytes(b"fake-video")
     cloud_root = tmp_path / "CloudDrive"
     cloud_root.mkdir()
 
-    destination = yt.move_to_cloud(content_folder, cloud_root)
+    destination = yt.move_to_cloud(content_folder, cloud_root, "output")
 
     assert destination == cloud_root / "output" / "My Video"
     assert (destination / "My Video.mp4").is_file()
     assert not content_folder.exists()
 
 
-# --- validate_cloud_folder ---
+def test_move_to_cloud_respects_a_custom_output_subfolder_name(tmp_path):
+    content_folder = tmp_path / "output" / "My Video"
+    content_folder.mkdir(parents=True)
+    cloud_root = tmp_path / "CloudDrive"
+    cloud_root.mkdir()
 
+    destination = yt.move_to_cloud(content_folder, cloud_root, "custom-output")
 
-def test_validate_cloud_folder_rejects_missing_path(tmp_path):
-    with pytest.raises(ValueError):
-        yt.validate_cloud_folder(str(tmp_path / "nope"))
-
-
-def test_validate_cloud_folder_accepts_existing_directory(tmp_path):
-    yt.validate_cloud_folder(str(tmp_path))  # does not raise
+    assert destination == cloud_root / "custom-output" / "My Video"
 
 
 # --- main ---
@@ -270,20 +269,17 @@ def test_main_cloud_flag_prompts_for_config_and_moves_content_folder(tmp_path, m
     video_path = tmp_path / ".boring-stuff" / "output" / "My Video" / "My Video.mp4"
     monkeypatch.setattr(yt, "yt_dlp", type("m", (), {"YoutubeDL": make_fake_ydl_class({url: [video_path]})}))
 
-    calls = []
-
-    def fake_load_config_value(config_name, message, default, *keys, validate=None):
-        calls.append((config_name, message, default, keys))
-        if validate is not None:
-            validate(str(cloud_root))
-        return str(cloud_root)
-
-    monkeypatch.setattr(yt, "load_config_value", fake_load_config_value)
+    folder_calls = []
+    subfolder_calls = []
+    monkeypatch.setattr(yt, "load_cloud_folder", lambda: folder_calls.append(True) or cloud_root)
+    monkeypatch.setattr(
+        yt, "load_cloud_subfolder_name", lambda key, default: subfolder_calls.append((key, default)) or default
+    )
 
     yt.main(["-c", url])
 
-    expected_message = "Cloud folder root (e.g. your Google Drive mount path)"
-    assert calls == [(None, expected_message, None, ("cloud", "folder"))]
+    assert folder_calls == [True]
+    assert subfolder_calls == [("output", "output")]
     assert (cloud_root / "output" / "My Video" / "My Video.mp4").is_file()
     assert not video_path.parent.exists()
 
@@ -291,10 +287,10 @@ def test_main_cloud_flag_prompts_for_config_and_moves_content_folder(tmp_path, m
 def test_main_cloud_exits_cleanly_when_config_cannot_be_obtained(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(yt.Path, "home", lambda: tmp_path)
 
-    def raise_missing(*args, **kwargs):
+    def raise_missing():
         raise yt.MissingConfigError("Cloud folder root is not configured, and no terminal is attached.")
 
-    monkeypatch.setattr(yt, "load_config_value", raise_missing)
+    monkeypatch.setattr(yt, "load_cloud_folder", raise_missing)
 
     with pytest.raises(SystemExit):
         yt.main(["-c", "https://youtube.com/watch?v=abc"])
@@ -305,7 +301,8 @@ def test_main_cloud_exits_cleanly_when_config_cannot_be_obtained(tmp_path, monke
 def test_main_cloud_exits_cleanly_when_configured_folder_not_accessible(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(yt.Path, "home", lambda: tmp_path)
     missing = tmp_path / "not-mounted"
-    monkeypatch.setattr(yt, "load_config_value", lambda *args, **kwargs: str(missing))
+    monkeypatch.setattr(yt, "load_cloud_folder", lambda: missing)
+    monkeypatch.setattr(yt, "load_cloud_subfolder_name", lambda key, default: default)
 
     with pytest.raises(SystemExit):
         yt.main(["-c", "https://youtube.com/watch?v=abc"])

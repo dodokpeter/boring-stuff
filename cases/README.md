@@ -40,6 +40,27 @@ Removes the Jump List registration, the shortcut, and the icon (leaves your
 "Unpin from taskbar" afterward - Windows doesn't expose an API to do that
 part programmatically.
 
+## Add Boring Stuff to the File Explorer right-click menu
+
+A "Boring" submenu, on files: `move-to` (share/output) plus `negative`,
+`mp4to3`, `email-extract` (the last 3 only appear on their relevant file
+types); on folders: `move-to` (share/output) only. Registered under
+`HKCU` (not `HKLM`/`HKCR`), so no admin elevation is needed.
+
+**Windows 11 note:** its redesigned context menu hides classic entries
+like these under "Show more options" (or Shift+right-click) by default -
+that's a known, accepted limitation, not a bug.
+
+One-time setup:
+
+    uv run python cases/devs/explorer_menu/setup_explorer_menu.py
+
+Safe to re-run any time - it re-registers the menu in place.
+
+To remove it:
+
+    uv run python cases/devs/explorer_menu/setup_explorer_menu.py --uninstall
+
 ## Available scripts
 
 ### cases/devs
@@ -121,13 +142,18 @@ Run command:
 ### cases/pictures
 
 #### Negative
-Invert every picture in a folder to its negative, saved into a `negative`
-subfolder alongside the originals (so re-running doesn't invert its own
-output). Non-image files in the folder are skipped with a message.
+Invert a picture, or every picture in a folder, to its negative, saved into
+a `negative` subfolder alongside the original(s) (so re-running doesn't
+invert its own output). Non-image files are skipped with a message.
 
 Run command:
 
-    negative [directory_with_picture]
+    negative [picture]                 (invert just that one picture)
+    negative [directory_with_picture]  (invert every picture in the folder)
+
+Also available from the File Explorer right-click menu on common image
+files (see "Add Boring Stuff to the File Explorer right-click menu"
+above).
 
 ### cases/webs
 
@@ -144,13 +170,17 @@ Parameters:
 **-n3** - number of pages opened in browser
 
 #### Mp4to3
-Extract mp3 audio from every .mp4 file already sitting in a folder (doesn't
-download anything itself - see `yt -a` for downloading + extracting in
-one step).
+Extract mp3 audio from an .mp4 file, or every .mp4 file already sitting in
+a folder (doesn't download anything itself - see `yt -a` for downloading +
+extracting in one step), into a sibling `<name> - audio` folder.
 
 Run command:
 
-    mp4to3 [folder]
+    mp4to3 [file.mp4]   (extract just that one file's audio)
+    mp4to3 [folder]     (extract audio from every .mp4 file in the folder)
+
+Also available from the File Explorer right-click menu on `.mp4` files
+(see "Add Boring Stuff to the File Explorer right-click menu" above).
 
 #### Openwebs
 Open a batch of your usual sites in the browser, grouped by tag.
@@ -203,12 +233,15 @@ Parameters:
 
 **-t\<langcode\>** - download a transcript in that language, alongside the video (repeatable, e.g. `-ten -tsk`); a language that isn't available is reported but doesn't stop the rest of the download
 
-**-c** - move the content folder to `<cloud.folder>/output` after a successful download
+**-c** - move the content folder to `<cloud.folder>/<cloud.output>` after a successful download
 
-Configuration (in `~/.boring-stuff/BoringStuff.yml`, only prompted for when `-c` is used):
+Configuration (in `~/.boring-stuff/BoringStuff.yml`, only prompted for when
+`-c` is used) - same `cloud.folder`/`cloud.output` config as `move-to`'s
+`-o` flag:
 
     cloud:
-      folder: G:\My Drive
+      folder: G:\My Drive\boring-stuff
+      output: output
 
 ### cases/wins
 
@@ -271,7 +304,13 @@ suffix, same as `clipsave`. Processed `.msg` files are moved into a
 
 Run command:
 
-    email-extract
+    email-extract                  process whatever's already in the drop folder
+    email-extract <file.msg>       move that .msg into the drop folder first, then process it
+
+The second form is what the File Explorer right-click menu uses (see
+"Add Boring Stuff to the File Explorer right-click menu" above) - it's
+also handy for a `.msg` you already saved somewhere, without needing to
+drag it into the drop folder yourself.
 
 Also available from the taskbar Jump List (see the taskbar setup section
 above) once `setup_taskbar_icon.py` has been (re-)run.
@@ -285,23 +324,43 @@ saved automatically on first run if missing:
 The drop folder (`~/.boring-stuff/<dropFolderName>`) and the output folder
 (`~/.boring-stuff/output`) are created automatically if they don't exist.
 
+#### Move-to
+Move a file or folder to a cloud-synced destination - `-s` for the shared
+folder, `-o` for the output folder. `cloud.folder` is a plain local path
+(e.g. a Google Drive for Desktop mount) - no Google API/OAuth involved;
+whatever sync client is watching that path picks up the move on its own.
+A name collision at the destination gets a `(1)`, `(2)`, ... suffix, same
+as `clipsave`.
+
+Run command:
+
+    move-to -s <file-or-folder>    move to <cloud.folder>/<cloud.share>
+    move-to -o <file-or-folder>    move to <cloud.folder>/<cloud.output>
+
+Also available from the File Explorer right-click menu, on both files and
+folders (see "Add Boring Stuff to the File Explorer right-click menu"
+above).
+
+Configuration (in `~/.boring-stuff/BoringStuff.yml`) - prompted for and
+saved automatically on first run if missing. `cloud.folder` has no
+default (a real external path); `cloud.share`/`cloud.output` default to
+`share`/`output`:
+
+    cloud:
+      folder: G:\.shortcut-targets-by-id\<id>\Dodo\boring-stuff
+      share: share
+      output: output
+
 #### Shared-drive
-Make sure a `boring-stuff` folder exists inside a shared/synced drive folder
-(e.g. a Google Drive for Desktop mount), creating it if it isn't there yet.
-Works as a plain filesystem path - no Google API or OAuth setup needed,
-since the desktop sync client already mounts the folder as a real
-directory. First prompted config value only needs to be entered once.
+Make sure the configured cloud "share" folder exists, creating it if it
+isn't there yet. Works as a plain filesystem path - no Google API or OAuth
+setup needed, since the desktop sync client already mounts the folder as a
+real directory. Uses the same `cloud.folder`/`cloud.share` config as
+`move-to` above - first prompted value only needs to be entered once.
 
 Run command:
 
     shared-drive
-
-Configuration (in `~/.boring-stuff/BoringStuff.yml`) - prompted for and
-saved automatically on first run if missing:
-
-    drive:
-      directory:
-        boring-stuff: G:\.shortcut-targets-by-id\<id>\Dodo
 
 ### scripts
 

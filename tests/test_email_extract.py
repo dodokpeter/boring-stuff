@@ -451,7 +451,7 @@ def test_main_processes_and_renames_processed_file(tmp_path, monkeypatch, capsys
     )
     monkeypatch.setattr(email_extract.extract_msg, "Message", lambda path: fake_msg)
 
-    email_extract.main()
+    email_extract.main([])
 
     output_dir = tmp_path / ".boring-stuff" / "output"
     assert (output_dir / "2026-08-25 Peter Dodok.pdf").exists()
@@ -487,7 +487,7 @@ def test_main_adds_a_suffix_when_two_emails_rename_to_the_same_processed_name(tm
     }
     monkeypatch.setattr(email_extract.extract_msg, "Message", lambda path: messages_by_path[path])
 
-    email_extract.main()
+    email_extract.main([])
 
     processed_dir = drop_dir / "processed"
     assert (processed_dir / "2026-08-31 Peter Dodok 2026-08-25 Hello.msg").exists()
@@ -498,9 +498,70 @@ def test_main_reports_when_no_messages_found(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(email_extract.Path, "home", lambda: tmp_path)
     monkeypatch.setattr(email_extract, "load_config_value", lambda *args, **kwargs: "emails-to-process")
 
-    email_extract.main()
+    email_extract.main([])
 
     assert "No .msg files found" in capsys.readouterr().out
+
+
+def test_main_msg_path_argument_moves_file_into_drop_folder_then_processes_it(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(email_extract.Path, "home", lambda: tmp_path)
+    monkeypatch.setattr(email_extract, "load_config_value", lambda *args, **kwargs: "emails-to-process")
+
+    source = tmp_path / "Somewhere" / "email.msg"
+    source.parent.mkdir(parents=True)
+    source.write_bytes(b"fake msg bytes")
+
+    fake_msg = FakeMessage(
+        sender="Peter Dodok <peter@example.com>",
+        date=datetime(2026, 8, 25),
+        subject="Hello",
+        attachments=[FakeAttachment("invoice.pdf", b"%PDF-1.4")],
+    )
+    monkeypatch.setattr(email_extract.extract_msg, "Message", lambda path: fake_msg)
+
+    email_extract.main([str(source)])
+
+    assert not source.exists()  # moved out of its original location
+    drop_dir = tmp_path / ".boring-stuff" / "emails-to-process"
+    assert not (drop_dir / "email.msg").exists()  # already processed and archived
+    processed_dir = drop_dir / "processed"
+    assert (processed_dir / "2026-08-31 Peter Dodok 2026-08-25 Hello.msg").exists()
+
+    out = capsys.readouterr().out
+    assert "Moved into drop folder: email.msg" in out
+
+
+def test_main_msg_path_argument_exits_cleanly_when_source_does_not_exist(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(email_extract.Path, "home", lambda: tmp_path)
+    monkeypatch.setattr(email_extract, "load_config_value", lambda *args, **kwargs: "emails-to-process")
+
+    with pytest.raises(SystemExit):
+        email_extract.main([str(tmp_path / "nope.msg")])
+
+    assert "does not exist" in capsys.readouterr().out
+
+
+def test_main_msg_path_argument_avoids_collision_in_drop_folder(tmp_path, monkeypatch):
+    monkeypatch.setattr(email_extract.Path, "home", lambda: tmp_path)
+    monkeypatch.setattr(email_extract, "load_config_value", lambda *args, **kwargs: "emails-to-process")
+
+    drop_dir = tmp_path / ".boring-stuff" / "emails-to-process"
+    drop_dir.mkdir(parents=True)
+    (drop_dir / "email.msg").write_bytes(b"already there")
+
+    source = tmp_path / "Somewhere" / "email.msg"
+    source.parent.mkdir(parents=True)
+    source.write_bytes(b"the new one")
+
+    def raise_error(path):
+        raise ValueError("stop before real processing - only the move matters for this test")
+
+    monkeypatch.setattr(email_extract.extract_msg, "Message", raise_error)
+
+    email_extract.main([str(source)])
+
+    assert (drop_dir / "email.msg").read_bytes() == b"already there"
+    assert (drop_dir / "email (1).msg").read_bytes() == b"the new one"
 
 
 def test_main_reports_and_still_moves_file_when_duplicate(tmp_path, monkeypatch, capsys):
@@ -523,7 +584,7 @@ def test_main_reports_and_still_moves_file_when_duplicate(tmp_path, monkeypatch,
     )
     monkeypatch.setattr(email_extract.extract_msg, "Message", lambda path: fake_msg)
 
-    email_extract.main()
+    email_extract.main([])
 
     assert len(list(output_dir.glob("*.pdf"))) == 1  # still just the one
     assert not msg_path.exists()  # moved anyway, so it's not reprocessed next run
@@ -546,7 +607,7 @@ def test_main_continues_after_a_processing_failure(tmp_path, monkeypatch, capsys
 
     monkeypatch.setattr(email_extract.extract_msg, "Message", raise_error)
 
-    email_extract.main()
+    email_extract.main([])
 
     assert "Failed to process broken.msg" in capsys.readouterr().out
     assert (drop_dir / "broken.msg").exists()  # left in place, not moved
@@ -559,6 +620,6 @@ def test_main_exits_cleanly_when_config_cannot_be_obtained(monkeypatch, capsys):
     monkeypatch.setattr(email_extract, "load_config_value", raise_missing)
 
     with pytest.raises(SystemExit):
-        email_extract.main()
+        email_extract.main([])
 
     assert "not configured" in capsys.readouterr().out
