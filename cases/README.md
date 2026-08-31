@@ -8,6 +8,13 @@ hand every time.
 **Windows only.** `background`, this taskbar setup, and `clipsave` depend on
 `pywin32` and won't work on macOS or Linux.
 
+## Usage tracking
+
+Every command records one line to `~/.boring-stuff/usage.jsonl` each time
+it runs (command name + timestamp) - purely local, never sent anywhere.
+Only the last 10 calendar weeks are kept; older entries are pruned
+automatically. See the `stats` command below to view it.
+
 ## Add Boring Stuff to Taskbar in windows
 A pinned taskbar shortcut ("B" icon): left-click runs `clipsave`, right-click
 shows a Jump List menu with `b64d`/`b64e`/`background`/`json-pretty`
@@ -81,6 +88,16 @@ safe to delete (`git branch -d`, not `-D`); `--remote` deletes branches on
 origin via `git push origin --delete` - only ever branches already
 confirmed merged, but a real, visible-to-everyone deletion, so double-check
 the dry-run list first.
+
+#### Stats
+Print how often each boring-stuff command has been used - overall, and
+broken down by calendar week (Monday-Sunday) - from the last 10 weeks of
+data recorded in `~/.boring-stuff/usage.jsonl` (see "Usage tracking"
+above).
+
+Run command:
+
+    stats
 
 ### cases/git
 

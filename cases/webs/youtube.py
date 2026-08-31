@@ -19,8 +19,11 @@ from pathlib import Path
 
 import yt_dlp
 
+from core.stats import record_usage
+
 
 def main():
+    record_usage("youtube")
     # 1. Setup CLI Arguments
     parser = argparse.ArgumentParser(description="YouTube Downloader")
     parser.add_argument("urls", nargs="+", help="YouTube URLs")

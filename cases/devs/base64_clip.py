@@ -11,8 +11,11 @@ import sys
 
 import pyperclip
 
+from core.stats import record_usage
+
 
 def main_decode():
+    record_usage("b64d")
     text = pyperclip.paste()
     if not text:
         print("Clipboard is empty or contains no text.")
@@ -37,6 +40,7 @@ def main_decode():
 
 
 def main_encode():
+    record_usage("b64e")
     text = pyperclip.paste()
     if not text:
         print("Clipboard is empty or contains no text.")

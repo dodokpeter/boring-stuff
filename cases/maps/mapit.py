@@ -9,8 +9,11 @@ from urllib.parse import quote
 
 import pyperclip
 
+from core.stats import record_usage
+
 
 def main(argv=None):
+    record_usage("mapit")
     parser = argparse.ArgumentParser(description="Open a Google Maps place page")
     parser.add_argument("address", nargs="*", help="address to look up (default: the clipboard's text)")
     args = parser.parse_args(argv)

@@ -15,6 +15,7 @@ import sys
 from pathlib import Path
 
 from core.configuration.user_conf import MissingConfigError, load_config_value
+from core.stats import record_usage
 
 BORING_STUFF_FOLDER_NAME = "boring-stuff"
 
@@ -38,6 +39,7 @@ def ensure_boring_stuff_folder(root):
 
 
 def main():
+    record_usage("shared-drive")
     try:
         directory = load_config_value(
             None,

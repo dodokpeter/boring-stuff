@@ -7,6 +7,8 @@ import argparse
 import subprocess
 from pathlib import Path
 
+from core.stats import record_usage
+
 # ffmpeg on system path
 # download ffmpeg: https://www.gyan.dev/ffmpeg/builds/
 # https://video.stackexchange.com/questions/20495/how-do-i-set-up-and-use-ffmpeg-in-windows
@@ -18,6 +20,7 @@ def extract_audio(input_path, output_path):
 
 
 def main(argv=None):
+    record_usage("mp4to3")
     parser = argparse.ArgumentParser(description="Extract mp3 audio from every .mp4 file in a folder")
     parser.add_argument("folder", nargs="+", help="folder containing .mp4 files")
     args = parser.parse_args(argv)

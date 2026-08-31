@@ -12,8 +12,11 @@ from urllib.parse import quote_plus
 
 from googlesearch import search
 
+from core.stats import record_usage
+
 
 def main(argv=None):
+    record_usage("lucky")
     parser = argparse.ArgumentParser(description="Open the top Google results for a search")
     parser.add_argument("-n", type=int, default=4, dest="count", help="number of result pages to open (default: 4)")
     parser.add_argument("query", nargs="+", help="search terms")

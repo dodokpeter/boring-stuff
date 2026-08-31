@@ -21,6 +21,12 @@ not backfilled here.
 - `set-wallpaper` renamed to `background`.
 
 ### Added
+- Every command now records its own usage (command name + timestamp) to
+  `~/.boring-stuff/usage.jsonl` - purely local, last 10 calendar weeks
+  kept, older entries pruned automatically. New `stats` command prints a
+  report: overall usage and a per-calendar-week (Monday-Sunday) breakdown.
+  See issue #52; the taskbar Jump List auto-refreshing itself from this
+  data is tracked separately in #53, not part of this change.
 - `email-extract` processes `.msg` email files dropped into a configured
   folder: saves PDF attachments, saves image attachments and combines them
   into a PDF, and downloads any `.pdf` link found in the body - all into
