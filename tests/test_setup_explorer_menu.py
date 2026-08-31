@@ -1,8 +1,8 @@
-import winreg
-
 import pytest
 
 pytest.importorskip("winreg")
+
+import winreg
 
 from cases.devs.explorer_menu import setup_explorer_menu
 
