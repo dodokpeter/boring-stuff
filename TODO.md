@@ -27,5 +27,4 @@ Grouped roughly by payoff; each item names the file it applies to.
 
 ## Test gaps
 
-Untested modules: [cases/webs/youtube.py](cases/webs/youtube.py),
-[cases/git/gitConfig.py](cases/git/gitConfig.py).
+Untested modules: [cases/git/gitConfig.py](cases/git/gitConfig.py).

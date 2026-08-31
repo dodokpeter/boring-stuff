@@ -145,7 +145,7 @@ Parameters:
 
 #### Mp4to3
 Extract mp3 audio from every .mp4 file already sitting in a folder (doesn't
-download anything itself - see `youtube -a` for downloading + extracting in
+download anything itself - see `yt -a` for downloading + extracting in
 one step).
 
 Run command:
@@ -183,13 +183,32 @@ Configuration (in `~/.boring-stuff/BoringStuff.yml`):
     pinterest:
       randomBoard: https://pinterest.com/username/board.rss
 
-#### Youtube
-Download youtube video.
+#### Yt
+Download a YouTube video (or playlist) into `~/.boring-stuff/output`. Every
+download gets its own subfolder there, named after its title.
+
 Run command:
 
-    youtube -a [youtube url] - it creates also mp3 file
-    youtube [youtube url]
-    youtube [youtube playlist url]
+    yt [youtube url]                    (video only)
+    yt -a [youtube url]                 (also extracts an mp3 into <content-folder>/audio/)
+    yt -p [youtube playlist url]        (explicitly allow playlist download)
+    yt -ten -tsk [youtube url]          (also download English + Slovak transcripts; -t is repeatable)
+    yt -c [youtube url]                 (also move the content folder to the cloud after downloading)
+
+Parameters:
+
+**-a** - also extract an mp3 into `<content-folder>/audio/` (video stays in `<content-folder>`)
+
+**-p** - explicitly allow playlist download
+
+**-t\<langcode\>** - download a transcript in that language, alongside the video (repeatable, e.g. `-ten -tsk`); a language that isn't available is reported but doesn't stop the rest of the download
+
+**-c** - move the content folder to `<cloud.folder>/output` after a successful download
+
+Configuration (in `~/.boring-stuff/BoringStuff.yml`, only prompted for when `-c` is used):
+
+    cloud:
+      folder: G:\My Drive
 
 ### cases/wins
 
