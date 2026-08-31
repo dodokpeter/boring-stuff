@@ -11,9 +11,9 @@ hand every time.
 ## Add Boring Stuff to Taskbar in windows
 A pinned taskbar shortcut ("B" icon): left-click runs `clipsave`, right-click
 shows a Jump List menu with `b64d`/`b64e`/`background`/`json-pretty`
-(pretty-print and minify) - hover any item to see the command it runs. Each
-opens a terminal window that shows the result and closes itself after 60
-seconds.
+(pretty-print and minify)/`email-extract` - hover any item to see the
+command it runs. Each opens a terminal window that shows the result and
+closes itself after 60 seconds.
 
 One-time setup:
 
@@ -212,6 +212,42 @@ random-picture form:
 
     wallpaper:
       directory: C:\Pictures\Wallpapers
+
+#### Email-extract
+Process `.msg` email files: drag an email from Outlook (right-click has no
+supported context-menu option, and dropping onto a taskbar icon or a
+shortcut is refused - dropping into empty space in a real Explorer folder
+window is the trigger that actually works) into the configured drop
+folder, then run this command to extract from each one:
+
+- a PDF attachment - saved into the output folder
+- image attachments - each saved into the output folder, and also combined
+  into a single PDF
+- a link to a `.pdf` in the email body - downloaded into the output folder
+
+Every output file is named `<yyyy-mm-dd> <sender name>[.ext]` (date = the
+email's sent date, sender = its display name); content already saved
+under that name is detected by a hash check and reused instead of being
+duplicated, and any remaining name collision gets a `(1)`, `(2)`, ...
+suffix, same as `clipsave`. Processed `.msg` files are moved into a
+`processed` subfolder of the drop folder (not deleted), renamed to
+`<yyyy-mm-dd processed> <sender name> <yyyy-mm-dd sent> <subject>.msg`.
+
+Run command:
+
+    email-extract
+
+Also available from the taskbar Jump List (see the taskbar setup section
+above) once `setup_taskbar_icon.py` has been (re-)run.
+
+Configuration (in `~/.boring-stuff/BoringStuff.yml`) - prompted for and
+saved automatically on first run if missing:
+
+    outlook:
+      dropFolderName: emails-to-process
+
+The drop folder (`~/.boring-stuff/<dropFolderName>`) and the output folder
+(`~/.boring-stuff/output`) are created automatically if they don't exist.
 
 #### Shared-drive
 Make sure a `boring-stuff` folder exists inside a shared/synced drive folder

@@ -13,6 +13,7 @@ dependencies = [
     "pyperclip>=1.11.0",
     "pywin32>=312; sys_platform == 'win32'",
     "xmltodict>=1.0.4",
+    "extract-msg>=0.56.1",
 ]
 
 [project.scripts]
@@ -32,6 +33,7 @@ pinterest = "cases.webs.pinterest:main"
 openwebs = "cases.webs.openwebs:main"
 mp4to3 = "cases.webs.mp4to3:main"
 shared-drive = "cases.wins.shared_drive:main"
+email-extract = "cases.wins.email_extract:main"
 
 [tool.setuptools.packages.find]
 include = ["cases*", "core*", "scripts*"]
