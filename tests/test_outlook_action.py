@@ -465,6 +465,35 @@ def test_main_processes_and_renames_processed_file(tmp_path, monkeypatch, capsys
     assert "Saved: 2026-08-25 Peter Dodok.pdf" in out
 
 
+def test_main_adds_a_suffix_when_two_emails_rename_to_the_same_processed_name(tmp_path, monkeypatch):
+    monkeypatch.setattr(outlook_action.Path, "home", lambda: tmp_path)
+    monkeypatch.setattr(outlook_action, "load_config_value", lambda *args, **kwargs: "emails-to-process")
+
+    drop_dir = tmp_path / ".boring-stuff" / "emails-to-process"
+    drop_dir.mkdir(parents=True)
+    (drop_dir / "email1.msg").write_bytes(b"fake msg bytes 1")
+    (drop_dir / "email2.msg").write_bytes(b"fake msg bytes 2")
+
+    # Two different messages that happen to identify the same way (same
+    # sender/date/subject) - e.g. the same email dropped in twice under
+    # different filenames.
+    messages_by_path = {
+        str(drop_dir / "email1.msg"): FakeMessage(
+            sender="Peter Dodok <peter@example.com>", date=datetime(2026, 8, 25), subject="Hello"
+        ),
+        str(drop_dir / "email2.msg"): FakeMessage(
+            sender="Peter Dodok <peter@example.com>", date=datetime(2026, 8, 25), subject="Hello"
+        ),
+    }
+    monkeypatch.setattr(outlook_action.extract_msg, "Message", lambda path: messages_by_path[path])
+
+    outlook_action.main()
+
+    processed_dir = drop_dir / "processed"
+    assert (processed_dir / "2026-08-31 Peter Dodok 2026-08-25 Hello.msg").exists()
+    assert (processed_dir / "2026-08-31 Peter Dodok 2026-08-25 Hello (1).msg").exists()
+
+
 def test_main_reports_when_no_messages_found(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(outlook_action.Path, "home", lambda: tmp_path)
     monkeypatch.setattr(outlook_action, "load_config_value", lambda *args, **kwargs: "emails-to-process")
