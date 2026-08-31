@@ -23,8 +23,7 @@ dependencies = [
 
 [project.scripts]
 hello = "scripts.hello:main"
-youtube = "cases.webs.youtube:main"
-yt = "cases.webs.youtube:main"
+yt = "cases.webs.yt:main"
 clipsave = "cases.wins.clipsave:main"
 background = "cases.wins.background:main"
 b64d = "cases.devs.base64_clip:main_decode"

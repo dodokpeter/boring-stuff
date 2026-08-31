@@ -99,7 +99,7 @@ or Anaconda needed.
 
 ## Additional installations
 
-### youtube command
+### yt command
 
 For the MP3 extraction to work, ffmpeg must be on your system path.
 The Modern Way: The easiest way to install it is via winget (Windows Package Manager):

@@ -9,7 +9,7 @@ Write-Host "Installing dependencies..." -ForegroundColor Yellow
 uv sync
 
 # `uv sync` alone doesn't install this project's own console scripts
-# (hello/youtube/yt) since pyproject.toml isn't set up as a proper uv
+# (hello/yt) since pyproject.toml isn't set up as a proper uv
 # package - it can even uninstall them if already present. Reinstall in
 # editable mode so those commands keep working after every setup run.
 uv pip install -e .

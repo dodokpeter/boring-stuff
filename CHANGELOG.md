@@ -19,6 +19,8 @@ not backfilled here.
 
 ### Breaking
 - `set-wallpaper` renamed to `background`.
+- `youtube` renamed to `yt` (module file `cases/webs/youtube.py` renamed to
+  `cases/webs/yt.py` to match). `youtube` no longer runs.
 
 ### Added
 - Every command now records its own usage (command name + timestamp) to
@@ -43,6 +45,19 @@ not backfilled here.
 - `background <color>` sets a solid desktop color (a standard 12-color
   palette, falling back to CSS3/X11 color names) instead of a random
   picture.
+- `yt` (see Breaking, above) now gives every download its own subfolder
+  under `~/.boring-stuff/output` (the same folder `email-extract` writes
+  into, replacing the old hardcoded `~/Videos/YoutubeDownload`), named
+  after the video/playlist title - a well-defined `<content-folder>` so
+  the new `-c` flag has something self-contained to move. `-a`'s mp3 now
+  lands in `<content-folder>/audio/` instead of alongside the video.
+  `-t<langcode>` downloads a transcript into `<content-folder>` and is
+  repeatable (e.g. `-ten -tsk` for English + Slovak); a language that
+  isn't available is reported without aborting the rest of the download.
+  `-c` moves the content folder to `<cloud.folder>/output` after a
+  successful download - `cloud.folder` is a new config value (plain local
+  path, e.g. a Google Drive for Desktop mount - no API/OAuth), same
+  pattern as `shared-drive`'s `drive.directory`. See issue #55.
 - `json-pretty` (and `json-pretty --minify`) pretty-prints or minifies the
   clipboard's JSON text in place.
 - Scripts with a required config value (`background`'s wallpaper directory,
