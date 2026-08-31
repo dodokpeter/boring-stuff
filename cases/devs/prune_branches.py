@@ -11,6 +11,8 @@ import argparse
 import subprocess
 import sys
 
+from core.stats import record_usage
+
 
 def run(*args):
     return subprocess.run(["git", *args], capture_output=True, text=True)
@@ -89,6 +91,7 @@ def prune_remote(remote_ref, default_branch, do_delete):
 
 
 def main(argv=None):
+    record_usage("prune-branches")
     parser = argparse.ArgumentParser(description="Delete branches already merged into origin's default branch")
     parser.add_argument("--yes", "-y", action="store_true", help="actually delete (default is a dry run)")
     parser.add_argument(

@@ -1,8 +1,10 @@
 #! python3
 from core.configuration.user_conf import create_config_path, load_config, save_config
+from core.stats import record_usage
 
 
 def main():
+    record_usage("hello")
     print("--- BoringStuff Initializer ---")
 
     name = input("What is your name? ")

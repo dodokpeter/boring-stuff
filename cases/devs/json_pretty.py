@@ -11,8 +11,11 @@ import sys
 
 import pyperclip
 
+from core.stats import record_usage
+
 
 def main(argv=None):
+    record_usage("json-pretty")
     parser = argparse.ArgumentParser(description="Pretty-print or minify the clipboard's JSON text")
     parser.add_argument("-m", "--minify", action="store_true", help="minify instead of pretty-printing")
     args = parser.parse_args(argv)

@@ -35,6 +35,7 @@ import requests
 from PIL import Image
 
 from core.configuration.user_conf import MissingConfigError, load_config_value
+from core.stats import record_usage
 
 DEFAULT_DROP_FOLDER_NAME = "emails-to-process"
 OUTPUT_FOLDER_NAME = "output"
@@ -234,6 +235,7 @@ def process_message_file(msg_path, output_dir):
 
 
 def main():
+    record_usage("email-extract")
     try:
         folder_name = load_config_value(
             None,

@@ -22,6 +22,7 @@ from pathlib import Path
 from PIL import Image, ImageColor
 
 from core.configuration.user_conf import MissingConfigError, load_config_value
+from core.stats import record_usage
 
 SPI_SETDESKWALLPAPER = 20
 
@@ -137,6 +138,7 @@ def set_random_picture_background(directory):
 
 
 def main(argv=None):
+    record_usage("background")
     parser = argparse.ArgumentParser(description="Set the desktop background")
     parser.add_argument(
         "color",

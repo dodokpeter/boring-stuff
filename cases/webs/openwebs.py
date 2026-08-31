@@ -16,6 +16,7 @@ import argparse
 import webbrowser
 
 from core.configuration.user_conf import load_config
+from core.stats import record_usage
 
 DEFAULT_GROUPS = {
     "init": [
@@ -39,6 +40,7 @@ DEFAULT_GROUPS = {
 
 
 def main(argv=None):
+    record_usage("openwebs")
     parser = argparse.ArgumentParser(description="Open a batch of your usual sites in the browser")
     parser.add_argument("tags", nargs="*", help="only open these groups (default: every group)")
     args = parser.parse_args(argv)

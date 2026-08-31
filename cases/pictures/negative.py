@@ -10,8 +10,11 @@ from pathlib import Path
 
 from PIL import Image, ImageOps, UnidentifiedImageError
 
+from core.stats import record_usage
+
 
 def main(argv=None):
+    record_usage("negative")
     parser = argparse.ArgumentParser(description="Invert every picture in a folder to its negative")
     parser.add_argument("directory", nargs="+", help="folder containing pictures")
     args = parser.parse_args(argv)

@@ -15,6 +15,8 @@ from pathlib import Path
 
 from PIL import Image, ImageGrab
 
+from core.stats import record_usage
+
 
 def report_saved(action, path):
     print(f"{action}: {path.name}")
@@ -70,6 +72,7 @@ def save_clipboard_files(paths, downloads, timestamp):
 
 
 def main():
+    record_usage("clipsave")
     downloads = Path.home() / "Downloads"
     downloads.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y-%m-%d %H-%M-%S")

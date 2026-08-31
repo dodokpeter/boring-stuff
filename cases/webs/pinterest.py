@@ -10,9 +10,11 @@ import requests
 import xmltodict
 
 from core.configuration.user_conf import MissingConfigError, load_config_value
+from core.stats import record_usage
 
 
 def main():
+    record_usage("pinterest")
     try:
         url = load_config_value(None, "Pinterest board RSS URL", None, "pinterest", "randomBoard")
     except MissingConfigError as e:
