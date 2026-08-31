@@ -70,7 +70,14 @@ any other folder.
 ## 🔧 Environment & Dependencies
 
 ### Python Management
-This project uses **Python 3.12+**. We no longer recommend manual Path edits or Anaconda for this repo.
+This project is pinned to **Python 3.12** (`.python-version`, and
+`requires-python` in `pyproject.toml`) - not just "3.12+". `quickjs`'s
+prebuilt Windows wheels only go up to 3.12; on a newer interpreter `uv`
+would resolve past them and try to compile `quickjs` from source, which
+fails without MSVC Build Tools installed. `uv sync`/`uv run` respect
+`.python-version` automatically - if 3.12 isn't already on the machine,
+`uv` downloads it itself (via `uv python install`), no manual Path edits
+or Anaconda needed.
 * **Virtual Environments:** Managed automatically via `uv` or `venv`.
 * **Dependencies:** All core libraries are tracked in `pyproject.toml`, locked in `uv.lock`.
 

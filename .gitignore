@@ -93,7 +93,9 @@ target/
 .ipynb_checkpoints
 
 # pyenv
-.python-version
+# NOTE: .python-version is intentionally NOT ignored here - this repo
+# commits and shares one, so every clone pins to the same Python 3.12
+# (uv respects it automatically). See CHANGELOG.md for why.
 
 # celery beat schedule file
 celerybeat-schedule
