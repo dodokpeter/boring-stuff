@@ -1,5 +1,5 @@
 #! python3
-# outlook-action - process .msg email files dropped (via drag-and-drop from
+# email-extract - process .msg email files dropped (via drag-and-drop from
 # Outlook into a real Explorer folder window - Outlook has no supported way
 # to add a right-click item, and a taskbar/.lnk drop target refuses the
 # drag) into a configured folder:
@@ -15,7 +15,7 @@
 # "<yyyy-mm-dd processed> <sender name> <yyyy-mm-dd sent> <subject>.msg".
 #
 # Run command:
-#   outlook-action
+#   email-extract
 #
 # Configuration (in ~/.boring-stuff/BoringStuff.yml) - prompted for and
 # saved automatically on first run if missing:
