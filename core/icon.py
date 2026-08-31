@@ -13,11 +13,13 @@ def generate_icon(icon_path):
     for a shortcut/context-menu icon."""
     icon_path.parent.mkdir(parents=True, exist_ok=True)
     font = None
-    for name in ("arialbd.ttf", "segoeuib.ttf", "calibrib.ttf"):
-        path = os.path.join(os.environ["WINDIR"], "Fonts", name)
-        if os.path.exists(path):
-            font = ImageFont.truetype(path, 190)
-            break
+    windir = os.environ.get("WINDIR")
+    if windir:
+        for name in ("arialbd.ttf", "segoeuib.ttf", "calibrib.ttf"):
+            path = os.path.join(windir, "Fonts", name)
+            if os.path.exists(path):
+                font = ImageFont.truetype(path, 190)
+                break
     if font is None:
         font = ImageFont.load_default()
 
