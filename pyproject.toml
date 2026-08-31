@@ -33,7 +33,7 @@ pinterest = "cases.webs.pinterest:main"
 openwebs = "cases.webs.openwebs:main"
 mp4to3 = "cases.webs.mp4to3:main"
 shared-drive = "cases.wins.shared_drive:main"
-outlook-action = "cases.wins.outlook_action:main"
+email-extract = "cases.wins.email_extract:main"
 
 [tool.setuptools.packages.find]
 include = ["cases*", "core*", "scripts*"]

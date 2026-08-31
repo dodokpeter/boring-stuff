@@ -3,7 +3,7 @@
 #   - generates a B-lettered icon
 #   - creates Boring.lnk, whose default target runs clipsave
 #   - registers a Jump List (right-click menu) with b64d/b64e/background/
-#     json-pretty/json-pretty -m tasks
+#     json-pretty/json-pretty -m/email-extract tasks
 #
 # Run: uv run python cases/devs/taskbar/setup_taskbar_icon.py
 # Then: open the folder it prints, right-click Boring.lnk, "Pin to taskbar".
@@ -37,6 +37,7 @@ TASKS = [
     ("Set background", "run_background.bat", "background"),
     ("Pretty-print JSON", "run_json_pretty.bat", "json-pretty"),
     ("Minify JSON", "run_json_minify.bat", "json-pretty -m"),
+    ("Extract email content", "run_email_extract.bat", "email-extract"),
 ]
 
 
@@ -150,7 +151,10 @@ def main(argv=None):
 
     print(f"Shortcut created: {SHORTCUT_PATH}")
     print("Right-click it in Explorer and choose 'Pin to taskbar' to finish setup.")
-    print("Left-click on the pinned icon runs clipsave; right-click shows the b64d/b64e/background/json-pretty menu.")
+    print(
+        "Left-click on the pinned icon runs clipsave; right-click shows the "
+        "b64d/b64e/background/json-pretty/email-extract menu."
+    )
 
 
 if __name__ == "__main__":

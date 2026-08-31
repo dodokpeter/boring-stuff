@@ -45,6 +45,11 @@ def test_make_link_sets_description_as_hover_tooltip():
     assert link.GetDescription() == "background"
 
 
+def test_tasks_includes_email_extract():
+    bat_names = [bat_name for _title, bat_name, _description in setup_taskbar_icon.TASKS]
+    assert "run_email_extract.bat" in bat_names
+
+
 def test_make_task_collection_builds_one_link_per_entry():
     # IObjectArray.GetAt(index, IID) segfaults in this pywin32 environment
     # (reproduced outside pytest too), so - like register_jump_list below -
