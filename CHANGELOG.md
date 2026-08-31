@@ -56,6 +56,14 @@ not backfilled here.
   `windows-latest`, so the Windows-only code actually gets exercised.
 
 ### Fixed
+- `requires-python` is now `>=3.12,<3.13` (was unbounded `>=3.12`), and a
+  new `.python-version` file pins `uv sync`/`uv run` to 3.12 by default,
+  downloading it automatically if the machine doesn't have it. Without
+  this, a fresh machine whose only installed Python was newer (e.g. 3.14)
+  would have `uv` resolve against it, then fail installing `quickjs` -
+  its prebuilt Windows wheels only go up to 3.12, so anything newer falls
+  back to compiling from source and needs MSVC Build Tools. Hit for real
+  setting up a second machine.
 - `background` no longer stretches wallpaper pictures outside the screen.
 - `background <color>` no longer turns the desktop black regardless of the
   requested color.

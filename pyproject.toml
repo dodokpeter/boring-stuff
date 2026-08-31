@@ -1,7 +1,12 @@
 [project]
 name = "boring-stuff"
 version = "0.1.0"
-requires-python = ">=3.12"
+# Upper-bounded (not just >=3.12): quickjs's prebuilt Windows wheels only
+# go up to cp312. On a machine whose only installed Python is newer (e.g.
+# 3.14), an unbounded requirement lets uv resolve against it, then quickjs
+# falls back to compiling from source and fails without MSVC Build Tools
+# installed - a real failure mode hit on a fresh machine, not theoretical.
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "pyyaml",
     "openpyxl",
