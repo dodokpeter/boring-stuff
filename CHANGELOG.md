@@ -21,6 +21,13 @@ not backfilled here.
 - `set-wallpaper` renamed to `background`.
 
 ### Added
+- `outlook-action` processes `.msg` email files dropped into a configured
+  folder: saves PDF attachments, saves image attachments and combines them
+  into a PDF, and downloads any `.pdf` link found in the body - all into
+  an output folder, named `<yyyy-mm-dd> <sender name>`. See issue #50 for
+  the ruled-out trigger mechanisms (Jump List item, taskbar icon,
+  shortcut icon all refuse the drop - a real Explorer folder window is
+  the only one that works).
 - `shared-drive` ensures a `boring-stuff` folder exists inside a configured
   shared/synced drive folder (e.g. a Google Drive for Desktop mount),
   creating it if missing. First step toward using such a folder as a plain
