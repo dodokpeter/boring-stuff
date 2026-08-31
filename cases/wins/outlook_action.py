@@ -7,8 +7,12 @@
 #   - image attachments are saved into the output folder, and also combined
 #     into one PDF
 #   - a link to a .pdf in the email body is downloaded into the output folder
-# Every output file is named "<yyyy-mm-dd> <sender name>[.ext]". Processed
-# .msg files are moved into a "processed" subfolder, not deleted.
+# Every output file is named "<yyyy-mm-dd> <sender name>[.ext]". Before
+# writing, each piece of content is hash-checked against what's already in
+# the output folder (same sender/date) so dropping the same email more than
+# once doesn't produce repeat copies. Processed .msg files are moved into a
+# "processed" subfolder (not deleted), renamed to
+# "<yyyy-mm-dd processed> <sender name> <yyyy-mm-dd sent> <subject>.msg".
 #
 # Run command:
 #   outlook-action
@@ -18,9 +22,12 @@
 #   outlook:
 #     dropFolderName: emails-to-process
 
+import hashlib
 import re
 import shutil
 import sys
+from datetime import datetime
+from io import BytesIO
 from pathlib import Path
 
 import extract_msg
@@ -62,6 +69,16 @@ def extract_sender_name(sender):
     return name or sender
 
 
+def extract_email_identity(msg):
+    """Return (sender_name, sent_date_str, subject), each already
+    filesystem-sanitized - used both for output filenames and the
+    processed-folder rename."""
+    sender_name = sanitize_filename_part(extract_sender_name(msg.sender))
+    sent_date_str = msg.date.strftime("%Y-%m-%d") if msg.date else "unknown-date"
+    subject = sanitize_filename_part(msg.subject or "no-subject")
+    return sender_name, sent_date_str, subject
+
+
 def unique_path(path):
     """Same collision-avoidance scheme as clipsave.py's unique_path."""
     if not path.exists():
@@ -72,6 +89,29 @@ def unique_path(path):
         if not candidate.exists():
             return candidate
         n += 1
+
+
+def save_bytes_if_new(data, output_dir, base_name, suffix):
+    """Write `data` to output_dir as "<base_name><suffix>" (or a
+    collision-numbered variant), unless a file already there whose name
+    starts with `base_name` and ends with `suffix` has the exact same
+    content - in which case that existing file is reused and nothing new
+    is written. This is what stops the same email (dropped more than once,
+    or reprocessed) from producing repeat output files.
+
+    Returns (path, is_new)."""
+    digest = hashlib.sha256(data).hexdigest()
+    for existing in output_dir.iterdir():
+        if not existing.is_file():
+            continue
+        if not (existing.name.startswith(base_name) and existing.name.endswith(suffix)):
+            continue
+        if hashlib.sha256(existing.read_bytes()).hexdigest() == digest:
+            return existing, False
+
+    target = unique_path(output_dir / f"{base_name}{suffix}")
+    target.write_bytes(data)
+    return target, True
 
 
 def classify_attachment(attachment):
@@ -88,9 +128,12 @@ def find_message_files(folder):
 
 
 def find_pdf_links(text):
+    """Extract .pdf links, de-duplicated (preserving order) - the same
+    link commonly appears more than once (e.g. in both the plain-text and
+    HTML versions of a body), and there's no point downloading it twice."""
     if not text:
         return []
-    return PDF_LINK_PATTERN.findall(text)
+    return list(dict.fromkeys(PDF_LINK_PATTERN.findall(text)))
 
 
 def gather_searchable_text(msg):
@@ -108,69 +151,84 @@ def gather_searchable_text(msg):
 
 
 def save_pdf_attachment(attachment, output_dir, base_name):
-    target = unique_path(output_dir / f"{base_name}.pdf")
-    target.write_bytes(attachment.data)
-    return target
+    return save_bytes_if_new(attachment.data, output_dir, base_name, ".pdf")
 
 
 def save_images_and_build_pdf(image_attachments, output_dir, base_name):
-    """Save each image attachment as its own file, and also combine all of
-    them into a single PDF (via Pillow - already a dependency). Returns the
-    list of saved image paths plus the combined PDF path."""
-    saved_images = []
+    """Save each image attachment (deduped against existing output
+    content), and also combine all of them into a single PDF (via Pillow -
+    already a dependency; also deduped). Returns (image_results,
+    pdf_result), each a (path, is_new) pair or list of pairs."""
+    image_results = []
     for attachment in image_attachments:
         suffix = Path(attachment.getFilename() or "").suffix.lower() or ".jpg"
-        target = unique_path(output_dir / f"{base_name}{suffix}")
-        target.write_bytes(attachment.data)
-        saved_images.append(target)
+        image_results.append(save_bytes_if_new(attachment.data, output_dir, base_name, suffix))
 
-    pdf_target = unique_path(output_dir / f"{base_name}.pdf")
-    opened = [Image.open(path).convert("RGB") for path in saved_images]
+    opened = [Image.open(path).convert("RGB") for path, _is_new in image_results]
     try:
-        opened[0].save(pdf_target, save_all=True, append_images=opened[1:])
+        buffer = BytesIO()
+        opened[0].save(buffer, format="PDF", save_all=True, append_images=opened[1:])
     finally:
         for image in opened:
             image.close()
 
-    return saved_images, pdf_target
+    pdf_result = save_bytes_if_new(buffer.getvalue(), output_dir, base_name, ".pdf")
+    return image_results, pdf_result
 
 
 def download_pdf_link(url, output_dir, base_name):
-    target = unique_path(output_dir / f"{base_name}.pdf")
     response = requests.get(url, timeout=30)
     response.raise_for_status()
-    target.write_bytes(response.content)
-    return target
+    return save_bytes_if_new(response.content, output_dir, base_name, ".pdf")
+
+
+def report_save(path, is_new):
+    if is_new:
+        print(f"  Saved: {path.name}")
+    else:
+        print(f"  Duplicate, already saved as: {path.name}")
 
 
 def process_message_file(msg_path, output_dir):
     """Extract PDFs/images/linked PDFs from one .msg file into output_dir.
-    Returns the list of saved paths (empty if there was nothing to do)."""
+    Returns (saved, sender_name, sent_date_str, subject) - `saved` is the
+    list of newly-created paths (empty if there was nothing new to do;
+    duplicates of existing output are reported but not included)."""
     msg = extract_msg.Message(str(msg_path))
     try:
-        sender_name = sanitize_filename_part(extract_sender_name(msg.sender))
-        date_str = msg.date.strftime("%Y-%m-%d") if msg.date else "unknown-date"
-        base_name = f"{date_str} {sender_name}"
+        sender_name, sent_date_str, subject = extract_email_identity(msg)
+        base_name = f"{sent_date_str} {sender_name}"
 
         saved = []
 
         pdf_attachments = [a for a in msg.attachments if classify_attachment(a) == "pdf"]
         for attachment in pdf_attachments:
-            saved.append(save_pdf_attachment(attachment, output_dir, base_name))
+            path, is_new = save_pdf_attachment(attachment, output_dir, base_name)
+            report_save(path, is_new)
+            if is_new:
+                saved.append(path)
 
         image_attachments = [a for a in msg.attachments if classify_attachment(a) == "image"]
         if image_attachments:
-            images, combined_pdf = save_images_and_build_pdf(image_attachments, output_dir, base_name)
-            saved.extend(images)
-            saved.append(combined_pdf)
+            image_results, pdf_result = save_images_and_build_pdf(image_attachments, output_dir, base_name)
+            for path, is_new in image_results:
+                report_save(path, is_new)
+                if is_new:
+                    saved.append(path)
+            report_save(*pdf_result)
+            if pdf_result[1]:
+                saved.append(pdf_result[0])
 
         for url in find_pdf_links(gather_searchable_text(msg)):
             try:
-                saved.append(download_pdf_link(url, output_dir, base_name))
+                path, is_new = download_pdf_link(url, output_dir, base_name)
+                report_save(path, is_new)
+                if is_new:
+                    saved.append(path)
             except requests.exceptions.RequestException as e:
                 print(f"  Could not download {url}: {e}")
 
-        return saved
+        return saved, sender_name, sent_date_str, subject
     finally:
         msg.close()
 
@@ -206,18 +264,17 @@ def main():
     for msg_path in message_files:
         print(f"Processing: {msg_path.name}")
         try:
-            saved = process_message_file(msg_path, output_dir)
+            saved, sender_name, sent_date_str, subject = process_message_file(msg_path, output_dir)
         except Exception as e:  # noqa: BLE001 - one bad .msg shouldn't stop the rest of the batch
             print(f"  Failed to process {msg_path.name}: {e}")
             continue
 
-        if saved:
-            for path in saved:
-                print(f"  Saved: {path.name}")
-        else:
-            print("  Nothing to extract.")
+        if not saved:
+            print("  Nothing new to extract.")
 
-        target = unique_path(processed_dir / msg_path.name)
+        processed_date_str = datetime.now().strftime("%Y-%m-%d")
+        processed_name = f"{processed_date_str} {sender_name} {sent_date_str} {subject}.msg"
+        target = unique_path(processed_dir / processed_name)
         shutil.move(str(msg_path), str(target))
 
 
