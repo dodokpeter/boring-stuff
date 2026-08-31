@@ -5,7 +5,8 @@
 #     FILE_ONLY_ITEMS_BY_EXTENSION below)
 #   - on folders: move-to (share/output)
 # Registered under HKCU (not HKLM/HKCR machine-wide), so no admin
-# elevation is needed.
+# elevation is needed. Uses the same "B"-lettered icon as the taskbar
+# shortcut (core/icon.py) - generated fresh (or regenerated) on every run.
 #
 # Windows 11's redesigned context menu hides classic entries like these
 # under "Show more options" (or Shift+right-click) by default - a known,
@@ -18,8 +19,11 @@ import argparse
 import winreg
 from pathlib import Path
 
+from core.icon import generate_icon
+
 MENU_DIR = Path(__file__).resolve().parent
 REPO_ROOT = MENU_DIR.parent.parent.parent
+ICON_PATH = Path.home() / ".boring-stuff" / "boring.ico"
 
 SUBMENU_NAME = "Boring"
 SUBMENU_LABEL = "Boring"
@@ -54,6 +58,7 @@ def register_boring_submenu(class_key_path, items):
     with winreg.CreateKey(winreg.HKEY_CURRENT_USER, submenu_key_path) as submenu_key:
         winreg.SetValueEx(submenu_key, "MUIVerb", 0, winreg.REG_SZ, SUBMENU_LABEL)
         winreg.SetValueEx(submenu_key, "SubCommands", 0, winreg.REG_SZ, "")
+        winreg.SetValueEx(submenu_key, "Icon", 0, winreg.REG_SZ, str(ICON_PATH))
 
     for subkey_name, label, bat_filename in items:
         item_key_path = f"{submenu_key_path}\\shell\\{subkey_name}"
@@ -65,6 +70,7 @@ def register_boring_submenu(class_key_path, items):
 
 
 def register_all():
+    generate_icon(ICON_PATH)
     register_boring_submenu("*", MOVE_ITEMS)
     register_boring_submenu("Directory", MOVE_ITEMS)
     for extension, items in FILE_ONLY_ITEMS_BY_EXTENSION.items():

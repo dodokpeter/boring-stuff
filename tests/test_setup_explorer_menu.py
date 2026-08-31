@@ -10,8 +10,11 @@ from cases.devs.explorer_menu import setup_explorer_menu
 @pytest.fixture(autouse=True)
 def isolated_submenu_name(monkeypatch):
     # Never touch the real "Boring" submenu - that's the one that would
-    # show up in the developer's actual right-click menu.
+    # show up in the developer's actual right-click menu. Also stub out
+    # generate_icon() so register_all() doesn't regenerate the real
+    # ~/.boring-stuff/boring.ico on every test run.
     monkeypatch.setattr(setup_explorer_menu, "SUBMENU_NAME", "BoringTest")
+    monkeypatch.setattr(setup_explorer_menu, "generate_icon", lambda icon_path: None)
     yield
     setup_explorer_menu.uninstall()
 
@@ -44,6 +47,24 @@ def test_register_boring_submenu_creates_muiverb_and_subcommands(tmp_path):
     assert read_named_value(base, "SubCommands") == ""
 
     setup_explorer_menu.delete_key_tree(winreg.HKEY_CURRENT_USER, "Software\\Classes\\BoringTestClass")
+
+
+def test_register_boring_submenu_sets_icon(tmp_path):
+    setup_explorer_menu.register_boring_submenu("BoringTestClassIcon", [("Item", "Do the thing", "run_x.bat")])
+
+    base = "Software\\Classes\\BoringTestClassIcon\\shell\\BoringTest"
+    assert read_named_value(base, "Icon") == str(setup_explorer_menu.ICON_PATH)
+
+    setup_explorer_menu.delete_key_tree(winreg.HKEY_CURRENT_USER, "Software\\Classes\\BoringTestClassIcon")
+
+
+def test_register_all_generates_the_icon(monkeypatch):
+    calls = []
+    monkeypatch.setattr(setup_explorer_menu, "generate_icon", lambda icon_path: calls.append(icon_path))
+
+    setup_explorer_menu.register_all()
+
+    assert calls == [setup_explorer_menu.ICON_PATH]
 
 
 def test_register_boring_submenu_creates_item_and_command(tmp_path):
