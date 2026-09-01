@@ -15,23 +15,13 @@ from pathlib import Path
 
 from PIL import Image, ImageGrab
 
+from core.files import unique_path
 from core.stats import record_usage
 
 
 def report_saved(action, path):
     print(f"{action}: {path.name}")
     print(f"Folder: {path.parent}")
-
-
-def unique_path(path):
-    if not path.exists():
-        return path
-    n = 1
-    while True:
-        candidate = path.with_name(f"{path.stem} ({n}){path.suffix}")
-        if not candidate.exists():
-            return candidate
-        n += 1
 
 
 def get_clipboard_text():

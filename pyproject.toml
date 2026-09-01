@@ -38,6 +38,7 @@ openwebs = "cases.webs.openwebs:main"
 mp4to3 = "cases.webs.mp4to3:main"
 shared-drive = "cases.wins.shared_drive:main"
 email-extract = "cases.wins.email_extract:main"
+move-to = "cases.wins.move_to:main"
 stats = "cases.devs.stats:main"
 
 [tool.setuptools.packages.find]

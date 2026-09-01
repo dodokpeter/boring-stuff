@@ -1,7 +1,9 @@
 #! python3
-# convert mp4 to mp3
+# mp4to3 - extract mp3 audio from an .mp4 file, or every .mp4 file in a
+# folder, into a sibling "<name> - audio" folder.
 #
-# mp4to3 [folder]
+# mp4to3 <file.mp4>   extract just that one file's audio
+# mp4to3 <folder>     extract audio from every .mp4 file in the folder
 
 import argparse
 import subprocess
@@ -21,19 +23,25 @@ def extract_audio(input_path, output_path):
 
 def main(argv=None):
     record_usage("mp4to3")
-    parser = argparse.ArgumentParser(description="Extract mp3 audio from every .mp4 file in a folder")
-    parser.add_argument("folder", nargs="+", help="folder containing .mp4 files")
+    parser = argparse.ArgumentParser(description="Extract mp3 audio from an .mp4 file, or every .mp4 file in a folder")
+    parser.add_argument("path", nargs="+", help="an .mp4 file, or a folder containing .mp4 files")
     args = parser.parse_args(argv)
-    folder = " ".join(args.folder)
+    path = Path(" ".join(args.path))
 
-    print(f"<<<{folder}>>>")
+    if not path.exists():
+        print(f"'{path}' does not exist.")
+        return
 
-    source_dir = Path(folder)
-    files = source_dir.glob("*.mp4")
-    for file in files:
+    if path.is_file():
+        audio_dir = Path(f"{path.parent} - audio")
+        extract_audio(input_path=path, output_path=str(audio_dir / path.name.replace(".mp4", ".mp3")))
+        return
+
+    print(f"<<<{path}>>>")
+    audio_dir = Path(f"{path} - audio")
+    for file in path.glob("*.mp4"):
         print(file.name)
         filename = file.name.replace(".mp4", ".mp3")
-        audio_dir = Path(folder + " - audio")
         extract_audio(input_path=file, output_path=str(audio_dir / filename))
 
 

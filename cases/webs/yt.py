@@ -24,18 +24,20 @@
 #
 # yt -c [youtube url]
 # after a successful download, move <content-folder> to
-# <cloud.folder>/output - a plain local path (e.g. a Google Drive for
-# Desktop mount), same pattern as shared-drive's drive.directory. No
-# Google Drive API/OAuth - whatever sync client is watching that path
+# <cloud.folder>/<cloud.output> - a plain local path (e.g. a Google Drive
+# for Desktop mount), same cloud.folder used by shared-drive and move-to.
+# No Google Drive API/OAuth - whatever sync client is watching that path
 # picks up the move on its own.
 #
-# Default output folder: ~/.boring-stuff/output (same folder email-extract
-# writes into).
+# Default download folder: ~/.boring-stuff/output (same local folder
+# email-extract writes into - unrelated to the cloud.output config below,
+# which names a *subfolder of cloud.folder*, not this local one).
 #
 # Configuration (in ~/.boring-stuff/BoringStuff.yml) - only prompted for
 # when -c is used:
 #   cloud:
-#     folder: G:\My Drive
+#     folder: G:\My Drive\boring-stuff
+#     output: output
 
 import argparse
 import shutil
@@ -44,19 +46,12 @@ from pathlib import Path
 
 import yt_dlp
 
-from core.configuration.user_conf import MissingConfigError, load_config_value
+from core.cloud import DEFAULT_OUTPUT_SUBFOLDER_NAME, load_cloud_folder, load_cloud_subfolder_name
+from core.configuration.user_conf import MissingConfigError
 from core.stats import record_usage
 
 OUTPUT_FOLDER_NAME = "output"
 AUDIO_SUBFOLDER_NAME = "audio"
-
-
-def validate_cloud_folder(value):
-    """Raise ValueError with a clear message if `value` isn't an accessible
-    directory - used to reject a bad answer before it gets persisted to
-    config."""
-    if not Path(value).is_dir():
-        raise ValueError(f"'{value}' is not an accessible directory.")
 
 
 def build_ydl_opts(output_dir, args, progress_hook):
@@ -136,11 +131,11 @@ def move_audio_files(content_folder):
     return moved
 
 
-def move_to_cloud(content_folder, cloud_root):
+def move_to_cloud(content_folder, cloud_root, output_subfolder_name):
     """Move content_folder (and everything under it) into
-    <cloud_root>/output/<content_folder name> via a plain filesystem move -
-    no Drive API/OAuth involved."""
-    destination_root = cloud_root / OUTPUT_FOLDER_NAME
+    <cloud_root>/<output_subfolder_name>/<content_folder name> via a plain
+    filesystem move - no Drive API/OAuth involved."""
+    destination_root = cloud_root / output_subfolder_name
     destination_root.mkdir(parents=True, exist_ok=True)
     destination = destination_root / content_folder.name
     shutil.move(str(content_folder), str(destination))
@@ -168,21 +163,15 @@ def main(argv=None):
     args = parser.parse_args(argv)
 
     cloud_root = None
+    output_subfolder_name = None
     if args.cloud:
         try:
-            cloud_root = load_config_value(
-                None,
-                "Cloud folder root (e.g. your Google Drive mount path)",
-                None,
-                "cloud",
-                "folder",
-                validate=validate_cloud_folder,
-            )
+            cloud_root = load_cloud_folder()
+            output_subfolder_name = load_cloud_subfolder_name("output", DEFAULT_OUTPUT_SUBFOLDER_NAME)
         except MissingConfigError as e:
             print(e)
             sys.exit(1)
 
-        cloud_root = Path(cloud_root)
         if not cloud_root.is_dir():
             print(f"Configured cloud folder is not accessible: {cloud_root}")
             sys.exit(1)
@@ -201,7 +190,7 @@ def main(argv=None):
             move_audio_files(content_folder)
 
         if args.cloud:
-            destination = move_to_cloud(content_folder, cloud_root)
+            destination = move_to_cloud(content_folder, cloud_root, output_subfolder_name)
             print(f"  Moved to cloud: {destination}")
 
 

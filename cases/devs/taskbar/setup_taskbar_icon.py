@@ -12,7 +12,6 @@
 # Run with --uninstall to remove the shortcut, icon, and Jump List again.
 
 import argparse
-import os
 from pathlib import Path
 
 import pythoncom
@@ -20,7 +19,8 @@ import win32com.propsys.propsys as propsys
 import win32com.propsys.pscon as pscon
 import win32com.shell.shell as shell
 import win32com.shell.shellcon as shellcon
-from PIL import Image, ImageDraw, ImageFont
+
+from core.icon import generate_icon as _generate_icon
 
 APP_ID = "BoringStuff.Launcher"
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
@@ -42,23 +42,7 @@ TASKS = [
 
 
 def generate_icon():
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    font = None
-    for name in ("arialbd.ttf", "segoeuib.ttf", "calibrib.ttf"):
-        path = os.path.join(os.environ["WINDIR"], "Fonts", name)
-        if os.path.exists(path):
-            font = ImageFont.truetype(path, 190)
-            break
-    if font is None:
-        font = ImageFont.load_default()
-
-    size = 256
-    img = Image.new("RGBA", (size, size), (25, 25, 25, 255))
-    draw = ImageDraw.Draw(img)
-    bbox = draw.textbbox((0, 0), "B", font=font)
-    w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
-    draw.text(((size - w) / 2 - bbox[0], (size - h) / 2 - bbox[1]), "B", font=font, fill=(240, 200, 60, 255))
-    img.save(ICON_PATH, sizes=[(16, 16), (32, 32), (48, 48), (256, 256)])
+    _generate_icon(ICON_PATH)
 
 
 def make_link(bat_name, description=None):
