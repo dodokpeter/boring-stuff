@@ -30,6 +30,16 @@ not backfilled here.
   `<cloud.folder>/logs/`. `batch --dry-run` lists what would run without
   touching anything. New `noop` command (`noop`/`noop --fail`) exists to
   exercise `batch` against a real subprocess in tests. See issue #60.
+- `batch-schedule` registers an opt-in daily Windows Scheduled Task that
+  runs `batch` at a configured time (`batch.scheduleTime`, 24-hour
+  `HH:MM:SS` with seconds always `00` - Windows Task Scheduler has no
+  finer precision - default `03:00:00`) - nothing is scheduled until it's
+  run explicitly; `uv sync`/
+  `setup.ps1` never register a task on their own. `--status` shows the
+  task's current trigger vs. the configured time; `--uninstall` removes
+  it. Runs quietly via `pythonw.exe` (no console window), "only when
+  logged on" (no Windows password stored), and skips (not catches up) a
+  day the machine is off/asleep for. See issue #62.
 - Every command now records its own usage (command name + timestamp) to
   `~/.boring-stuff/usage.jsonl` - purely local, last 10 calendar weeks
   kept, older entries pruned automatically. New `stats` command prints a
