@@ -107,6 +107,38 @@ Uses the same `cloud.folder` config as `move-to`/`shared-drive`/`yt -c` (see
 "Add Boring Stuff to the File Explorer right-click menu" above) - no
 separate config of its own.
 
+#### Batch-schedule
+Opt-in daily scheduler for `batch`, via a Windows Scheduled Task. **Nothing
+is scheduled by default** - no task exists until this is run explicitly,
+and neither `uv sync` nor `setup.ps1` ever registers one.
+
+Run command:
+
+    batch-schedule              register (or refresh) the daily task
+    batch-schedule --status     show whether the task exists, its current
+                                 trigger, the configured time, and its next run
+    batch-schedule --uninstall  remove the task (leaves BoringStuff.yml
+                                 untouched, matching setup_taskbar_icon.py)
+
+If the machine is off or asleep at the scheduled time, that day's run is
+simply skipped - no wake, no catch-up. The task runs "only when logged on"
+(no Windows password is ever stored), and its action runs quietly via
+`pythonw.exe` - no console window appears overnight. Everything it does is
+recorded in `<cloud.folder>/logs/` per `batch` above.
+
+Configuration (in `~/.boring-stuff/BoringStuff.yml`) - prompted for and
+saved automatically on first use:
+
+    batch:
+      scheduleTime: "03:00"
+
+**One-run delay on a config change:** the scheduled run re-reads
+`batch.scheduleTime` each time and updates its own trigger if it's drifted
+from the task, but only *after* that run - changing `03:00` to `01:00`
+means tonight's run still fires at 03:00, notices the change, and only
+starts firing at 01:00 the night after. Re-running `batch-schedule`
+directly applies a new time immediately instead of waiting for that.
+
 #### Json-pretty
 Pretty-print (or minify) the clipboard's JSON text, in place - result goes
 straight back onto the clipboard, no files.

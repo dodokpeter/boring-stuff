@@ -41,6 +41,7 @@ email-extract = "cases.wins.email_extract:main"
 move-to = "cases.wins.move_to:main"
 stats = "cases.devs.stats:main"
 batch = "cases.devs.batch:main"
+batch-schedule = "cases.devs.batch_schedule:main"
 noop = "cases.devs.noop:main"
 
 [tool.setuptools.packages.find]
