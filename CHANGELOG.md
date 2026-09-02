@@ -31,8 +31,10 @@ not backfilled here.
   touching anything. New `noop` command (`noop`/`noop --fail`) exists to
   exercise `batch` against a real subprocess in tests. See issue #60.
 - `batch-schedule` registers an opt-in daily Windows Scheduled Task that
-  runs `batch` at a configured time (`batch.scheduleTime`, default
-  `03:00`) - nothing is scheduled until it's run explicitly; `uv sync`/
+  runs `batch` at a configured time (`batch.scheduleTime`, 24-hour
+  `HH:MM:SS` with seconds always `00` - Windows Task Scheduler has no
+  finer precision - default `03:00:00`) - nothing is scheduled until it's
+  run explicitly; `uv sync`/
   `setup.ps1` never register a task on their own. `--status` shows the
   task's current trigger vs. the configured time; `--uninstall` removes
   it. Runs quietly via `pythonw.exe` (no console window), "only when

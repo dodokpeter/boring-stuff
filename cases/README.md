@@ -127,16 +127,18 @@ simply skipped - no wake, no catch-up. The task runs "only when logged on"
 recorded in `<cloud.folder>/logs/` per `batch` above.
 
 Configuration (in `~/.boring-stuff/BoringStuff.yml`) - prompted for and
-saved automatically on first use:
+saved automatically on first use. 24-hour `HH:MM:SS`, seconds always
+`00` - Windows Task Scheduler has no finer precision, so anything else is
+rejected:
 
     batch:
-      scheduleTime: "03:00"
+      scheduleTime: "03:00:00"
 
 **One-run delay on a config change:** the scheduled run re-reads
 `batch.scheduleTime` each time and updates its own trigger if it's drifted
-from the task, but only *after* that run - changing `03:00` to `01:00`
-means tonight's run still fires at 03:00, notices the change, and only
-starts firing at 01:00 the night after. Re-running `batch-schedule`
+from the task, but only *after* that run - changing `03:00:00` to
+`01:00:00` means tonight's run still fires at 3 AM, notices the change,
+and only starts firing at 1 AM the night after. Re-running `batch-schedule`
 directly applies a new time immediately instead of waiting for that.
 
 #### Json-pretty

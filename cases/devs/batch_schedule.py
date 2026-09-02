@@ -30,7 +30,13 @@
 # Configuration (in ~/.boring-stuff/BoringStuff.yml) - prompted for and
 # saved automatically on first use:
 #   batch:
-#     scheduleTime: "03:00"
+#     scheduleTime: "03:00:00"
+#
+# Seconds must be "00": Windows Task Scheduler only has minute-level
+# precision - schtasks /ST silently truncates any other seconds value
+# (confirmed for real: /ST 06:15:45 registered as 6:15:00 AM), which would
+# otherwise never match what query_task() reads back and cause the
+# trigger-sync in run_scheduled() to "fix" the task on every single run.
 
 import argparse
 import re
@@ -44,25 +50,28 @@ from core.cloud import load_cloud_folder
 from core.configuration.user_conf import MissingConfigError, load_config_value
 
 TASK_NAME = "BoringStuffBatch"
-DEFAULT_SCHEDULE_TIME = "03:00"
+DEFAULT_SCHEDULE_TIME = "03:00:00"
 SCRIPT_PATH = Path(__file__).resolve()
 PYTHONW_PATH = Path(sys.executable).resolve().with_name("pythonw.exe")
 
-TIME_PATTERN = re.compile(r"^([01]\d|2[0-3]):([0-5]\d)$")
+TIME_PATTERN = re.compile(r"^([01]\d|2[0-3]):([0-5]\d):00$")
 
 
 def validate_schedule_time(value):
-    """Raise ValueError unless `value` is a 24-hour HH:MM string - used to
-    reject a bad answer before it gets persisted to config or handed to
-    schtasks."""
+    """Raise ValueError unless `value` is a 24-hour HH:MM:00 string -
+    seconds must be "00" (see module docstring) - used to reject a bad
+    answer before it gets persisted to config or handed to schtasks."""
     if not TIME_PATTERN.match(value):
-        raise ValueError(f"'{value}' must be 24-hour HH:MM (e.g. 03:00 or 06:30).")
+        raise ValueError(
+            f"'{value}' must be 24-hour HH:MM:SS with seconds \"00\" "
+            "(e.g. 03:00:00 or 21:00:00) - Windows Task Scheduler has no finer precision."
+        )
 
 
 def load_schedule_time():
     return load_config_value(
         None,
-        "Daily batch time (HH:MM)",
+        "Daily batch time (HH:MM:SS)",
         DEFAULT_SCHEDULE_TIME,
         "batch",
         "scheduleTime",
@@ -126,13 +135,13 @@ def delete_task():
 def parse_task_start_time(fields):
     """Normalize the task's "Start Time" field (schtasks reports it as a
     12-hour "H:MM:SS AM/PM" string, e.g. "3:00:00 AM") into the same
-    24-hour HH:MM form batch.scheduleTime uses, so the two are directly
+    24-hour HH:MM:SS form batch.scheduleTime uses, so the two are directly
     comparable. Returns None if the field is missing or unparseable."""
     raw = fields.get("Start Time")
     if not raw:
         return None
     try:
-        return datetime.strptime(raw, "%I:%M:%S %p").strftime("%H:%M")
+        return datetime.strptime(raw, "%I:%M:%S %p").strftime("%H:%M:%S")
     except ValueError:
         return None
 

@@ -24,12 +24,25 @@ Start Date:                           9/2/2026
 # --- validate_schedule_time ---
 
 
-@pytest.mark.parametrize("value", ["03:00", "00:00", "23:59", "06:30", "12:00"])
+@pytest.mark.parametrize("value", ["03:00:00", "00:00:00", "23:59:00", "06:30:00", "12:00:00", "21:00:00"])
 def test_validate_schedule_time_accepts_valid_times(value):
     batch_schedule.validate_schedule_time(value)  # does not raise
 
 
-@pytest.mark.parametrize("value", ["3:00", "24:00", "12:60", "not-a-time", "", "03:00:00", "3pm"])
+@pytest.mark.parametrize(
+    "value",
+    [
+        "3:00:00",  # missing leading zero on hour
+        "24:00:00",
+        "12:60:00",
+        "not-a-time",
+        "",
+        "03:00",  # missing seconds
+        "03:00:45",  # non-zero seconds - schtasks silently truncates these, so they're rejected outright
+        "03:00:00:00",
+        "3pm",
+    ],
+)
 def test_validate_schedule_time_rejects_invalid_times(value):
     with pytest.raises(ValueError):
         batch_schedule.validate_schedule_time(value)
@@ -53,12 +66,12 @@ def test_create_or_update_task_calls_schtasks_create_with_force(monkeypatch):
     calls = []
     monkeypatch.setattr(batch_schedule.subprocess, "run", lambda args, **kw: calls.append(args) or fake_result())
 
-    batch_schedule.create_or_update_task("06:30")
+    batch_schedule.create_or_update_task("06:30:00")
 
     (args,) = calls
     assert args[0:2] == ["schtasks", "/Create"]
     assert "/F" in args
-    assert "06:30" in args
+    assert "06:30:00" in args
     assert batch_schedule.TASK_NAME in args
 
 
@@ -97,16 +110,16 @@ def test_delete_task_calls_schtasks_delete(monkeypatch):
 
 
 def test_parse_task_start_time_normalizes_12_hour_am():
-    assert batch_schedule.parse_task_start_time({"Start Time": "3:00:00 AM"}) == "03:00"
+    assert batch_schedule.parse_task_start_time({"Start Time": "3:00:00 AM"}) == "03:00:00"
 
 
 def test_parse_task_start_time_normalizes_12_hour_pm():
-    assert batch_schedule.parse_task_start_time({"Start Time": "2:30:00 PM"}) == "14:30"
+    assert batch_schedule.parse_task_start_time({"Start Time": "2:30:00 PM"}) == "14:30:00"
 
 
 def test_parse_task_start_time_handles_midnight_and_noon():
-    assert batch_schedule.parse_task_start_time({"Start Time": "12:00:00 AM"}) == "00:00"
-    assert batch_schedule.parse_task_start_time({"Start Time": "12:00:00 PM"}) == "12:00"
+    assert batch_schedule.parse_task_start_time({"Start Time": "12:00:00 AM"}) == "00:00:00"
+    assert batch_schedule.parse_task_start_time({"Start Time": "12:00:00 PM"}) == "12:00:00"
 
 
 def test_parse_task_start_time_returns_none_when_field_missing():
@@ -117,19 +130,26 @@ def test_parse_task_start_time_returns_none_for_unparseable_value():
     assert batch_schedule.parse_task_start_time({"Start Time": "garbage"}) is None
 
 
+def test_parse_task_start_time_truncates_nonzero_seconds_like_schtasks_does():
+    # schtasks itself never reports non-zero seconds back (it silently
+    # truncates /ST to minute precision), but this confirms parsing
+    # wouldn't choke if it ever did.
+    assert batch_schedule.parse_task_start_time({"Start Time": "3:00:45 AM"}) == "03:00:45"
+
+
 # --- register ---
 
 
 def test_register_creates_task_with_configured_time(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(batch_schedule, "load_cloud_folder", lambda: tmp_path)
-    monkeypatch.setattr(batch_schedule, "load_schedule_time", lambda: "06:30")
+    monkeypatch.setattr(batch_schedule, "load_schedule_time", lambda: "06:30:00")
     calls = []
     monkeypatch.setattr(batch_schedule, "create_or_update_task", lambda t: calls.append(t))
 
     batch_schedule.register()
 
-    assert calls == ["06:30"]
-    assert "06:30" in capsys.readouterr().out
+    assert calls == ["06:30:00"]
+    assert "06:30:00" in capsys.readouterr().out
 
 
 def test_register_exits_when_cloud_folder_config_missing(monkeypatch, capsys):
@@ -183,12 +203,12 @@ def test_status_reports_matching_configured_and_task_time(monkeypatch, capsys):
     monkeypatch.setattr(
         batch_schedule, "query_task", lambda: {"Start Time": "3:00:00 AM", "Next Run Time": "9/3/2026 3:00:00 AM"}
     )
-    monkeypatch.setattr(batch_schedule, "load_schedule_time", lambda: "03:00")
+    monkeypatch.setattr(batch_schedule, "load_schedule_time", lambda: "03:00:00")
 
     batch_schedule.status()
 
     out = capsys.readouterr().out
-    assert "03:00" in out
+    assert "03:00:00" in out
     assert "differ" not in out
 
 
@@ -196,12 +216,12 @@ def test_status_flags_when_configured_and_task_time_differ(monkeypatch, capsys):
     monkeypatch.setattr(
         batch_schedule, "query_task", lambda: {"Start Time": "3:00:00 AM", "Next Run Time": "9/3/2026 3:00:00 AM"}
     )
-    monkeypatch.setattr(batch_schedule, "load_schedule_time", lambda: "06:30")
+    monkeypatch.setattr(batch_schedule, "load_schedule_time", lambda: "06:30:00")
 
     batch_schedule.status()
 
     out = capsys.readouterr().out
-    assert "06:30" in out
+    assert "06:30:00" in out
     assert "differ" in out
 
 
@@ -234,7 +254,7 @@ def test_uninstall_removes_an_existing_task(monkeypatch, capsys):
 
 
 def test_run_scheduled_syncs_trigger_when_time_has_drifted(tmp_path, monkeypatch):
-    monkeypatch.setattr(batch_schedule, "load_schedule_time", lambda: "06:30")
+    monkeypatch.setattr(batch_schedule, "load_schedule_time", lambda: "06:30:00")
     monkeypatch.setattr(batch_schedule, "query_task", lambda: {"Start Time": "3:00:00 AM"})
     sync_calls = []
     monkeypatch.setattr(batch_schedule, "create_or_update_task", lambda t: sync_calls.append(t))
@@ -243,12 +263,12 @@ def test_run_scheduled_syncs_trigger_when_time_has_drifted(tmp_path, monkeypatch
 
     result = batch_schedule.run_scheduled()
 
-    assert sync_calls == ["06:30"]
+    assert sync_calls == ["06:30:00"]
     assert result == 0
 
 
 def test_run_scheduled_does_not_resync_when_time_matches(tmp_path, monkeypatch):
-    monkeypatch.setattr(batch_schedule, "load_schedule_time", lambda: "03:00")
+    monkeypatch.setattr(batch_schedule, "load_schedule_time", lambda: "03:00:00")
     monkeypatch.setattr(batch_schedule, "query_task", lambda: {"Start Time": "3:00:00 AM"})
     sync_calls = []
     monkeypatch.setattr(batch_schedule, "create_or_update_task", lambda t: sync_calls.append(t))
@@ -261,7 +281,7 @@ def test_run_scheduled_does_not_resync_when_time_matches(tmp_path, monkeypatch):
 
 
 def test_run_scheduled_runs_the_queue_and_returns_its_exit_code(tmp_path, monkeypatch):
-    monkeypatch.setattr(batch_schedule, "load_schedule_time", lambda: "03:00")
+    monkeypatch.setattr(batch_schedule, "load_schedule_time", lambda: "03:00:00")
     monkeypatch.setattr(batch_schedule, "query_task", lambda: {"Start Time": "3:00:00 AM"})
     monkeypatch.setattr(batch_schedule, "load_cloud_folder", lambda: tmp_path)
     seen_folders = []
@@ -283,7 +303,7 @@ def test_run_scheduled_returns_nonzero_when_schedule_time_config_missing(monkeyp
 
 
 def test_run_scheduled_returns_nonzero_when_cloud_folder_config_missing(monkeypatch):
-    monkeypatch.setattr(batch_schedule, "load_schedule_time", lambda: "03:00")
+    monkeypatch.setattr(batch_schedule, "load_schedule_time", lambda: "03:00:00")
     monkeypatch.setattr(batch_schedule, "query_task", lambda: {"Start Time": "3:00:00 AM"})
 
     def raise_missing():
@@ -295,7 +315,7 @@ def test_run_scheduled_returns_nonzero_when_cloud_folder_config_missing(monkeypa
 
 
 def test_run_scheduled_returns_nonzero_when_cloud_folder_not_accessible(tmp_path, monkeypatch):
-    monkeypatch.setattr(batch_schedule, "load_schedule_time", lambda: "03:00")
+    monkeypatch.setattr(batch_schedule, "load_schedule_time", lambda: "03:00:00")
     monkeypatch.setattr(batch_schedule, "query_task", lambda: {"Start Time": "3:00:00 AM"})
     monkeypatch.setattr(batch_schedule, "load_cloud_folder", lambda: tmp_path / "not-mounted")
 
@@ -303,7 +323,7 @@ def test_run_scheduled_returns_nonzero_when_cloud_folder_not_accessible(tmp_path
 
 
 def test_run_scheduled_handles_task_not_yet_registered(tmp_path, monkeypatch):
-    monkeypatch.setattr(batch_schedule, "load_schedule_time", lambda: "03:00")
+    monkeypatch.setattr(batch_schedule, "load_schedule_time", lambda: "03:00:00")
     monkeypatch.setattr(batch_schedule, "query_task", lambda: None)
     sync_calls = []
     monkeypatch.setattr(batch_schedule, "create_or_update_task", lambda t: sync_calls.append(t))
