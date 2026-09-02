@@ -23,6 +23,13 @@ not backfilled here.
   `cases/webs/yt.py` to match). `youtube` no longer runs.
 
 ### Added
+- `batch` runs a queued list of commands from `<cloud.folder>/toProcess.txt`
+  sequentially, removing each line from the queue as it completes
+  (atomically, so an interrupted run leaves the remaining work intact) and
+  logging successes/failures/failure-diagnostics per day under
+  `<cloud.folder>/logs/`. `batch --dry-run` lists what would run without
+  touching anything. New `noop` command (`noop`/`noop --fail`) exists to
+  exercise `batch` against a real subprocess in tests. See issue #60.
 - Every command now records its own usage (command name + timestamp) to
   `~/.boring-stuff/usage.jsonl` - purely local, last 10 calendar weeks
   kept, older entries pruned automatically. New `stats` command prints a

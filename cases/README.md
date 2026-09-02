@@ -77,6 +77,36 @@ Run command:
 If the clipboard isn't valid base64 (for `b64d`), or is empty, prints a
 message and exits non-zero without touching the clipboard.
 
+#### Batch
+Run a queued list of commands from `<cloud.folder>/toProcess.txt`, one at a
+time, sequentially - the next command only starts once the previous one has
+fully exited. Blank lines and lines starting with `#` are skipped. A
+failing command is logged and the run continues with the next line.
+
+Each command's line is removed from the queue as it completes (success or
+failure), rewritten atomically after every command - a re-run picks up
+where the last one stopped instead of re-running everything.
+
+Run command:
+
+    batch             run the queue
+    batch --dry-run   list what would run, without touching anything
+
+Logging, per calendar day, in `<cloud.folder>/logs/` (created if missing,
+always appended to):
+
+    <yyyy-mm-dd>_processed.txt        one line per successful command
+    <yyyy-mm-dd>_errors.txt           one line per failed command (verbatim -
+                                       can be renamed to toProcess.txt to
+                                       retry just the failures)
+    <yyyy-mm-dd>_errors_logs.txt      a diagnostics block per failure
+                                       (timestamp, command, exit code, stderr,
+                                       and stdout when non-empty)
+
+Uses the same `cloud.folder` config as `move-to`/`shared-drive`/`yt -c` (see
+"Add Boring Stuff to the File Explorer right-click menu" above) - no
+separate config of its own.
+
 #### Json-pretty
 Pretty-print (or minify) the clipboard's JSON text, in place - result goes
 straight back onto the clipboard, no files.
@@ -88,6 +118,17 @@ Run command:
 
 If the clipboard isn't valid JSON, or is empty, prints a message and exits
 non-zero without touching the clipboard.
+
+#### Noop
+Does nothing and exits `0`, ignoring any arguments; `noop --fail` writes a
+message to stderr and exits `1`. Exists purely to exercise `batch`'s
+success/failure paths against a real subprocess in tests - not meant to be
+run directly for any other reason.
+
+Run command:
+
+    noop
+    noop --fail
 
 #### Prune-branches
 Delete branches already merged into origin's default branch (master/main).

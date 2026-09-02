@@ -40,6 +40,8 @@ shared-drive = "cases.wins.shared_drive:main"
 email-extract = "cases.wins.email_extract:main"
 move-to = "cases.wins.move_to:main"
 stats = "cases.devs.stats:main"
+batch = "cases.devs.batch:main"
+noop = "cases.devs.noop:main"
 
 [tool.setuptools.packages.find]
 include = ["cases*", "core*", "scripts*"]
