@@ -12,7 +12,7 @@ def fake_result(returncode=0, stdout="", stderr=""):
 
 
 SAMPLE_FIELDS_TEXT = """Folder: \\
-HostName:                             NA-EX7901
+HostName:                             testHost
 TaskName:                             \\BoringStuffBatch
 Next Run Time:                        9/3/2026 3:00:00 AM
 Status:                               Ready
