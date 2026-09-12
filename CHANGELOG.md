@@ -23,6 +23,12 @@ not backfilled here.
   `cases/webs/yt.py` to match). `youtube` no longer runs.
 
 ### Added
+- `joinfiles <folder>` joins every `.m4a` file already sitting in a folder
+  into one (`<folder>/joined.m4a`), in alphabetical filename order, via
+  ffmpeg's concat demuxer with stream copy (no re-encoding). Needs at
+  least 2 files; a `joined.m4a` from a previous run is excluded from the
+  input set before joining. Only `.m4a` is supported for now. See issue
+  #64.
 - `batch` runs a queued list of commands from `<cloud.folder>/toProcess.txt`
   sequentially, removing each line from the queue as it completes
   (atomically, so an interrupted run leaves the remaining work intact) and
