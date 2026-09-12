@@ -72,6 +72,8 @@ def main(argv=None):
         return
 
     output_path = folder / OUTPUT_NAME
+    for f in files:
+        print(f.name)
     join_files(files, output_path)
     print(f"Joined {len(files)} files into {output_path}")
 

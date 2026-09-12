@@ -50,7 +50,7 @@ def test_prints_message_and_does_not_join_with_fewer_than_two_files(tmp_path, mo
     assert "need at least 2" in capsys.readouterr().out
 
 
-def test_joins_every_m4a_file_in_folder_order(tmp_path, monkeypatch):
+def test_joins_every_m4a_file_in_folder_order(tmp_path, monkeypatch, capsys):
     (tmp_path / "b.m4a").write_bytes(b"")
     (tmp_path / "a.m4a").write_bytes(b"")
 
@@ -63,6 +63,9 @@ def test_joins_every_m4a_file_in_folder_order(tmp_path, monkeypatch):
     files, output_path = calls[0]
     assert [f.name for f in files] == ["a.m4a", "b.m4a"]
     assert output_path == tmp_path / "joined.m4a"
+
+    out_lines = capsys.readouterr().out.splitlines()
+    assert out_lines[:2] == ["a.m4a", "b.m4a"]
 
 
 def test_excludes_previous_output_from_a_rerun(tmp_path, monkeypatch):

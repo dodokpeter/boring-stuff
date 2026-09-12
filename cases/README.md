@@ -247,7 +247,8 @@ Needs at least 2 `.m4a` files in the folder; prints a message and does
 nothing otherwise. Output goes to `<folder>/joined.m4a` - a `joined.m4a`
 already there from a previous run is excluded from the *input* set (so a
 re-run doesn't fold last run's output back into the next one) and then
-overwritten. Source files are left untouched.
+overwritten. Source files are left untouched. Prints each file's name in
+the order it was joined, then the output path.
 
 #### Lucky
 Open several (default is 4) page in default browser from googling
