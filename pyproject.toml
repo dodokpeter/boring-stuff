@@ -43,6 +43,7 @@ stats = "cases.devs.stats:main"
 batch = "cases.devs.batch:main"
 batch-schedule = "cases.devs.batch_schedule:main"
 noop = "cases.devs.noop:main"
+joinfiles = "cases.webs.joinfiles:main"
 
 [tool.setuptools.packages.find]
 include = ["cases*", "core*", "scripts*"]

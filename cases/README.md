@@ -232,6 +232,23 @@ above).
 
 ### cases/webs
 
+#### Joinfiles
+Join every `.m4a` file already sitting in a folder into one, in
+alphabetical filename order, via ffmpeg's concat demuxer with stream copy
+(no re-encoding) - fast and lossless, but requires all the files to share
+a compatible codec/sample rate/channel layout; if they don't, ffmpeg's own
+error is what you see. Only `.m4a` is supported for now.
+
+Run command:
+
+    joinfiles [folder]   (join every .m4a file in the folder into joined.m4a)
+
+Needs at least 2 `.m4a` files in the folder; prints a message and does
+nothing otherwise. Output goes to `<folder>/joined.m4a` - a `joined.m4a`
+already there from a previous run is excluded from the *input* set (so a
+re-run doesn't fold last run's output back into the next one) and then
+overwritten. Source files are left untouched.
+
 #### Lucky
 Open several (default is 4) page in default browser from googling
 
