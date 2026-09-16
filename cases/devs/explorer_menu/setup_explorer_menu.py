@@ -1,8 +1,8 @@
 #! python3
 # One-time setup for the "Boring" File Explorer right-click submenu:
-#   - on files: move-to (share/output), negative, mp4to3, email-extract
-#     (the last 3 only appear on their relevant extensions - see
-#     FILE_ONLY_ITEMS_BY_EXTENSION below)
+#   - on files: move-to (share/output), negative, mp4to3, splitfiles,
+#     email-extract (the last 4 only appear on their relevant extensions -
+#     see FILE_ONLY_ITEMS_BY_EXTENSION below)
 #   - on folders: move-to (share/output)
 # Registered under HKCU (not HKLM/HKCR machine-wide), so no admin
 # elevation is needed. Uses the same "B"-lettered icon as the taskbar
@@ -42,7 +42,10 @@ MOVE_ITEMS = [
 # extension -> list of (subkey_name, label, bat_filename) - file-only
 # items, scoped to where they're actually useful.
 FILE_ONLY_ITEMS_BY_EXTENSION = {
-    ".mp4": [("Mp4to3", "Extract mp3 (mp4to3)", "run_mp4to3.bat")],
+    ".mp4": [
+        ("Mp4to3", "Extract mp3 (mp4to3)", "run_mp4to3.bat"),
+        ("Splitfiles", "Split into parts (splitfiles)", "run_splitfiles.bat"),
+    ],
     ".msg": [("EmailExtract", "Extract email (email-extract)", "run_email_extract_file.bat")],
     **{ext: [("Negative", "Invert to negative", "run_negative.bat")] for ext in NEGATIVE_EXTENSIONS},
 }

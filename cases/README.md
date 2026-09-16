@@ -43,9 +43,10 @@ part programmatically.
 ## Add Boring Stuff to the File Explorer right-click menu
 
 A "Boring" submenu, on files: `move-to` (share/output) plus `negative`,
-`mp4to3`, `email-extract` (the last 3 only appear on their relevant file
-types); on folders: `move-to` (share/output) only. Registered under
-`HKCU` (not `HKLM`/`HKCR`), so no admin elevation is needed.
+`mp4to3`, `splitfiles`, `email-extract` (the last 4 only appear on their
+relevant file types); on folders: `move-to` (share/output) only.
+Registered under `HKCU` (not `HKLM`/`HKCR`), so no admin elevation is
+needed.
 
 **Windows 11 note:** its redesigned context menu hides classic entries
 like these under "Show more options" (or Shift+right-click) by default -
@@ -335,6 +336,38 @@ Configuration (in `~/.boring-stuff/BoringStuff.yml`, only prompted for when
     cloud:
       folder: G:\My Drive\boring-stuff
       output: output
+
+#### Splitfiles
+Split a large file into shorter parts, dispatching on file type - only
+`.mp4` is supported for now (via ffmpeg's segment muxer, stream copy, no
+re-encoding). Counterpart of `joinfiles`, above - the parts it writes are
+ordinary same-codec files, so `joinfiles`'s join logic can put them back
+together.
+
+Run command:
+
+    splitfiles [file.mp4]         prompt for the part length, then split
+    splitfiles [file.mp4] -m 45   split into 45-minute parts, no prompt
+
+Cut points are computed from the file's real duration (`ffprobe`) up
+front: a part is only started for a remainder of at least 5 minutes - a
+shorter remainder is folded into the previous part instead of becoming
+its own tiny file. A file that would end up as a single part is reported
+as "nothing to split" and nothing is written.
+
+Parts go into a sibling `<name> - parts\` folder, named
+`<name> - part 01.mp4`, `<name> - part 02.mp4`, ... - the original file is
+never modified, moved, or deleted.
+
+Also available from the File Explorer right-click menu on `.mp4` files
+(see "Add Boring Stuff to the File Explorer right-click menu" above).
+
+Configuration (in `~/.boring-stuff/BoringStuff.yml`) - an optional
+preference, like `openwebs`'s groups: a missing key just falls back to 30
+minutes rather than being prompted for:
+
+    splitfiles:
+      minutes: 30
 
 ### cases/wins
 

@@ -111,6 +111,19 @@ def test_register_all_puts_both_move_items_on_files_and_folders():
         assert key_exists(f"Software\\Classes\\{class_key}\\shell\\BoringTest\\shell\\MoveToOutput")
 
 
+def test_register_all_puts_both_mp4to3_and_splitfiles_on_mp4():
+    setup_explorer_menu.register_all()
+
+    base = "Software\\Classes\\.mp4\\shell\\BoringTest\\shell"
+    assert key_exists(f"{base}\\Mp4to3")
+    assert key_exists(f"{base}\\Splitfiles")
+
+    setup_explorer_menu.uninstall()
+
+    assert not key_exists(f"{base}\\Mp4to3")
+    assert not key_exists(f"{base}\\Splitfiles")
+
+
 def test_uninstall_removes_everything_register_all_created():
     setup_explorer_menu.register_all()
 
