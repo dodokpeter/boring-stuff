@@ -12,6 +12,19 @@
 # under "Show more options" (or Shift+right-click) by default - a known,
 # accepted limitation (see issue #58), not a bug in this script.
 #
+# Per-extension items are registered under
+# HKCU\...\Classes\SystemFileAssociations\<ext>\shell, not directly under
+# HKCU\...\Classes\<ext>\shell. Confirmed for real: when an extension has
+# its own ProgID (e.g. .mp4 -> "VLC.mp4", whatever app is set as the
+# default handler), Explorer builds that file's context menu by merging
+# verbs from the ProgID, from SystemFileAssociations\<ext>, from "*", and
+# from AllFilesystemObjects - never from "<ext>\shell" itself. A verb
+# registered there sits in the registry looking correct (and passing a
+# test that only checks the key exists) but never actually appears in
+# the real menu. This bit mp4to3's entry silently since issue #58, and
+# was only caught when splitfiles's entry didn't show up either - see
+# issue #67.
+#
 # Run: uv run python cases/devs/explorer_menu/setup_explorer_menu.py
 # Run with --uninstall to remove the registered menu again.
 
@@ -72,12 +85,19 @@ def register_boring_submenu(class_key_path, items):
             winreg.SetValueEx(command_key, None, 0, winreg.REG_SZ, f'"{bat_path}" "%1"')
 
 
+def system_file_association_key(extension):
+    """SystemFileAssociations\\<ext> is the merge point Explorer actually
+    reads for a per-extension verb, regardless of which app is the
+    extension's default handler - see the module docstring."""
+    return f"SystemFileAssociations\\{extension}"
+
+
 def register_all():
     generate_icon(ICON_PATH)
     register_boring_submenu("*", MOVE_ITEMS)
     register_boring_submenu("Directory", MOVE_ITEMS)
     for extension, items in FILE_ONLY_ITEMS_BY_EXTENSION.items():
-        register_boring_submenu(extension, items)
+        register_boring_submenu(system_file_association_key(extension), items)
 
 
 def delete_key_tree(root, path):
@@ -101,6 +121,10 @@ def uninstall():
     delete_key_tree(winreg.HKEY_CURRENT_USER, f"Software\\Classes\\*\\shell\\{SUBMENU_NAME}")
     delete_key_tree(winreg.HKEY_CURRENT_USER, f"Software\\Classes\\Directory\\shell\\{SUBMENU_NAME}")
     for extension in FILE_ONLY_ITEMS_BY_EXTENSION:
+        key = system_file_association_key(extension)
+        delete_key_tree(winreg.HKEY_CURRENT_USER, f"Software\\Classes\\{key}\\shell\\{SUBMENU_NAME}")
+        # Clean up a menu registered under the old, pre-#67-fix location
+        # too, for anyone who ran this script before the fix.
         delete_key_tree(winreg.HKEY_CURRENT_USER, f"Software\\Classes\\{extension}\\shell\\{SUBMENU_NAME}")
     print(f"Removed the '{SUBMENU_LABEL}' Explorer context menu.")
 

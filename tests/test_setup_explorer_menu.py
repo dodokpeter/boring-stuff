@@ -100,7 +100,8 @@ def test_register_all_covers_star_directory_and_every_extension():
     assert key_exists("Software\\Classes\\*\\shell\\BoringTest")
     assert key_exists("Software\\Classes\\Directory\\shell\\BoringTest")
     for extension in setup_explorer_menu.FILE_ONLY_ITEMS_BY_EXTENSION:
-        assert key_exists(f"Software\\Classes\\{extension}\\shell\\BoringTest")
+        key = setup_explorer_menu.system_file_association_key(extension)
+        assert key_exists(f"Software\\Classes\\{key}\\shell\\BoringTest")
 
 
 def test_register_all_puts_both_move_items_on_files_and_folders():
@@ -114,7 +115,7 @@ def test_register_all_puts_both_move_items_on_files_and_folders():
 def test_register_all_puts_both_mp4to3_and_splitfiles_on_mp4():
     setup_explorer_menu.register_all()
 
-    base = "Software\\Classes\\.mp4\\shell\\BoringTest\\shell"
+    base = "Software\\Classes\\SystemFileAssociations\\.mp4\\shell\\BoringTest\\shell"
     assert key_exists(f"{base}\\Mp4to3")
     assert key_exists(f"{base}\\Splitfiles")
 
@@ -122,6 +123,16 @@ def test_register_all_puts_both_mp4to3_and_splitfiles_on_mp4():
 
     assert not key_exists(f"{base}\\Mp4to3")
     assert not key_exists(f"{base}\\Splitfiles")
+
+
+def test_register_all_registers_under_system_file_associations_not_the_bare_extension():
+    # A verb registered directly under "<ext>\shell" is never actually
+    # merged into Explorer's context menu once the extension has its own
+    # ProgID (confirmed for real - see issue #67) - so register_all()
+    # must not use that location at all.
+    setup_explorer_menu.register_all()
+
+    assert not key_exists("Software\\Classes\\.mp4\\shell\\BoringTest")
 
 
 def test_uninstall_removes_everything_register_all_created():
@@ -132,7 +143,18 @@ def test_uninstall_removes_everything_register_all_created():
     assert not key_exists("Software\\Classes\\*\\shell\\BoringTest")
     assert not key_exists("Software\\Classes\\Directory\\shell\\BoringTest")
     for extension in setup_explorer_menu.FILE_ONLY_ITEMS_BY_EXTENSION:
-        assert not key_exists(f"Software\\Classes\\{extension}\\shell\\BoringTest")
+        key = setup_explorer_menu.system_file_association_key(extension)
+        assert not key_exists(f"Software\\Classes\\{key}\\shell\\BoringTest")
+
+
+def test_uninstall_also_removes_a_menu_registered_at_the_old_location():
+    # Cleans up for anyone who ran the pre-#67-fix version of this script,
+    # which registered directly under "<ext>\shell" (see above).
+    setup_explorer_menu.register_boring_submenu(".mp4", [("Mp4to3", "Extract mp3 (mp4to3)", "run_mp4to3.bat")])
+
+    setup_explorer_menu.uninstall()
+
+    assert not key_exists("Software\\Classes\\.mp4\\shell\\BoringTest")
 
 
 def test_uninstall_runs_without_error_when_nothing_was_installed():
