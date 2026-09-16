@@ -3,15 +3,13 @@
 # noop --fail - writes a message to stderr and exits 1.
 #
 # Exists purely to exercise `batch`'s success/failure paths against a real
-# subprocess, not just mocks.
+# subprocess, not just mocks. Deliberately does not call record_usage() -
+# it's a test tool, not a real command, so it must never show up in `stats`.
 
 import sys
 
-from core.stats import record_usage
-
 
 def main(argv=None):
-    record_usage("noop")
     args = sys.argv[1:] if argv is None else argv
 
     if "--fail" in args:

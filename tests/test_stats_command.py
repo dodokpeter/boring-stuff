@@ -44,3 +44,19 @@ def test_main_prints_report_and_records_its_own_usage(capsys):
 
     entries = stats.read_usage_entries()
     assert entries == [("stats", entries[0][1])]
+
+
+def test_main_leaves_noop_out_of_the_report(capsys):
+    stats.write_usage_entries([("noop", datetime.now()), ("noop", datetime.now()), ("clipsave", datetime.now())])
+
+    stats_cmd.main()
+
+    out = capsys.readouterr().out
+    assert "noop" not in out
+    assert "clipsave  1" in out
+
+
+def test_reportable_entries_drops_excluded_commands_only():
+    entries = [("noop", datetime(2026, 9, 1)), ("clipsave", datetime(2026, 9, 1))]
+
+    assert stats_cmd.reportable_entries(entries) == [("clipsave", datetime(2026, 9, 1))]

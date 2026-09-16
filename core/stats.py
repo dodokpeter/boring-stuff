@@ -1,6 +1,7 @@
 # Records and aggregates per-command usage, one JSON line per invocation,
 # in ~/.boring-stuff/usage.jsonl. Every registered boring-stuff command
-# calls record_usage() near the top of its main() - see issue #52.
+# calls record_usage() near the top of its main() - see issue #52 - except
+# the test-only `noop`, which must never appear in `stats`.
 #
 # Retention: record_usage() prunes anything older than RETENTION_WEEKS
 # calendar weeks on every call, so the file stays self-bounded without a

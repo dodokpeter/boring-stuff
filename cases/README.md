@@ -10,7 +10,8 @@ hand every time.
 
 ## Usage tracking
 
-Every command records one line to `~/.boring-stuff/usage.jsonl` each time
+Every command (except the test-only `noop`) records one line to
+`~/.boring-stuff/usage.jsonl` each time
 it runs (command name + timestamp) - purely local, never sent anywhere.
 Only the last 10 calendar weeks are kept; older entries are pruned
 automatically. See the `stats` command below to view it.
@@ -158,7 +159,8 @@ non-zero without touching the clipboard.
 Does nothing and exits `0`, ignoring any arguments; `noop --fail` writes a
 message to stderr and exits `1`. Exists purely to exercise `batch`'s
 success/failure paths against a real subprocess in tests - not meant to be
-run directly for any other reason.
+run directly for any other reason. Not recorded in usage tracking, and never
+shown by `stats`.
 
 Run command:
 
