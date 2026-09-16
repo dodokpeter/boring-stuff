@@ -23,6 +23,16 @@ not backfilled here.
   `cases/webs/yt.py` to match). `youtube` no longer runs.
 
 ### Added
+- `splitfiles <file.mp4>` splits a large file into ~30-minute parts (`-m N`
+  for a different length, otherwise prompted, default configurable via
+  `splitfiles.minutes`), via ffmpeg's segment muxer with stream copy (no
+  re-encoding). A remainder under 5 minutes is folded into the previous
+  part instead of becoming its own tiny file; a file that would end up as
+  a single part is reported as "nothing to split". Parts go into a
+  sibling `<name> - parts\` folder - the original file is never modified.
+  Only `.mp4` is supported for now. Counterpart of `joinfiles` - also
+  available from the File Explorer right-click menu on `.mp4` files. See
+  issue #67.
 - `joinfiles <folder>` joins every `.m4a` file already sitting in a folder
   into one (`<folder>/joined.m4a`), in alphabetical filename order, via
   ffmpeg's concat demuxer with stream copy (no re-encoding). Needs at
