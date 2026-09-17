@@ -1,6 +1,7 @@
 import pytest
 
 from cases.devs import noop
+from core import stats
 
 
 def test_main_exits_cleanly_with_no_args():
@@ -17,3 +18,11 @@ def test_main_fail_flag_writes_to_stderr_and_exits_1(capsys):
 
     assert exc_info.value.code == 1
     assert "failing as requested" in capsys.readouterr().err
+
+
+def test_main_does_not_record_usage():
+    noop.main([])
+    with pytest.raises(SystemExit):
+        noop.main(["--fail"])
+
+    assert stats.read_usage_entries() == []

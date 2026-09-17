@@ -8,6 +8,15 @@
 
 from core.stats import group_by_week, read_usage_entries, record_usage, top_commands
 
+# Test-only commands never belong in the report. `noop` no longer records
+# usage, but entries it wrote before that are still in usage.jsonl until they
+# age out, so they're filtered here rather than rewriting the user's file.
+EXCLUDED_COMMANDS = {"noop"}
+
+
+def reportable_entries(entries):
+    return [entry for entry in entries if entry[0] not in EXCLUDED_COMMANDS]
+
 
 def format_ranked(ranked):
     width = max(len(command) for command, _count in ranked)
@@ -33,7 +42,7 @@ def format_report(entries):
 
 def main():
     record_usage("stats")
-    print(format_report(read_usage_entries()))
+    print(format_report(reportable_entries(read_usage_entries())))
 
 
 if __name__ == "__main__":

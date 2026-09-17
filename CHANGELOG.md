@@ -123,6 +123,12 @@ not backfilled here.
   `windows-latest`, so the Windows-only code actually gets exercised.
 
 ### Fixed
+- `stats` no longer lists `noop`. The test-only command recorded its own
+  usage, and the `batch` end-to-end test runs it as a real subprocess -
+  which doesn't inherit the test suite's temp-home isolation - so every
+  test run wrote two `noop` entries into the real `usage.jsonl`, pushing it
+  to the top of the report. `noop` no longer records usage, and `stats`
+  filters out entries it already wrote.
 - `requires-python` is now `>=3.12,<3.13` (was unbounded `>=3.12`), and a
   new `.python-version` file pins `uv sync`/`uv run` to 3.12 by default,
   downloading it automatically if the machine doesn't have it. Without
