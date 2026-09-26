@@ -45,6 +45,7 @@ batch-schedule = "cases.devs.batch_schedule:main"
 noop = "cases.devs.noop:main"
 joinfiles = "cases.webs.joinfiles:main"
 splitfiles = "cases.webs.splitfiles:main"
+makezip = "cases.wins.makezip:main"
 
 [tool.setuptools.packages.find]
 include = ["cases*", "core*", "scripts*"]
