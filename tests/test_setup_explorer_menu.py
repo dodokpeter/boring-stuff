@@ -112,6 +112,22 @@ def test_register_all_puts_both_move_items_on_files_and_folders():
         assert key_exists(f"Software\\Classes\\{class_key}\\shell\\BoringTest\\shell\\MoveToOutput")
 
 
+def test_register_all_puts_makezip_on_folders_but_not_on_files():
+    setup_explorer_menu.register_all()
+
+    directory_item = "Software\\Classes\\Directory\\shell\\BoringTest\\shell\\MakeZip"
+    assert key_exists(directory_item)
+    assert read_named_value(directory_item, "MUIVerb") == "Make a zip version"
+    command = read_default_value(f"{directory_item}\\command")
+    assert command == f'"{setup_explorer_menu.MENU_DIR / "run_makezip.bat"}" "%1"'
+
+    assert not key_exists("Software\\Classes\\*\\shell\\BoringTest\\shell\\MakeZip")
+
+    setup_explorer_menu.uninstall()
+
+    assert not key_exists(directory_item)
+
+
 def test_register_all_puts_both_mp4to3_and_splitfiles_on_mp4():
     setup_explorer_menu.register_all()
 

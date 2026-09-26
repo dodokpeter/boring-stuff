@@ -3,7 +3,7 @@
 #   - on files: move-to (share/output), negative, mp4to3, splitfiles,
 #     email-extract (the last 4 only appear on their relevant extensions -
 #     see FILE_ONLY_ITEMS_BY_EXTENSION below)
-#   - on folders: move-to (share/output)
+#   - on folders: move-to (share/output), makezip
 # Registered under HKCU (not HKLM/HKCR machine-wide), so no admin
 # elevation is needed. Uses the same "B"-lettered icon as the taskbar
 # shortcut (core/icon.py) - generated fresh (or regenerated) on every run.
@@ -52,6 +52,10 @@ MOVE_ITEMS = [
     ("MoveToOutput", "Move to output", "run_move_to_output.bat"),
 ]
 
+# Folders get the move items plus makezip - a separate list rather than
+# appending to MOVE_ITEMS, since "*" (files) must not get makezip.
+DIRECTORY_ITEMS = MOVE_ITEMS + [("MakeZip", "Make a zip version", "run_makezip.bat")]
+
 # extension -> list of (subkey_name, label, bat_filename) - file-only
 # items, scoped to where they're actually useful.
 FILE_ONLY_ITEMS_BY_EXTENSION = {
@@ -95,7 +99,7 @@ def system_file_association_key(extension):
 def register_all():
     generate_icon(ICON_PATH)
     register_boring_submenu("*", MOVE_ITEMS)
-    register_boring_submenu("Directory", MOVE_ITEMS)
+    register_boring_submenu("Directory", DIRECTORY_ITEMS)
     for extension, items in FILE_ONLY_ITEMS_BY_EXTENSION.items():
         register_boring_submenu(system_file_association_key(extension), items)
 

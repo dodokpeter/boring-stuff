@@ -23,6 +23,13 @@ not backfilled here.
   `cases/webs/yt.py` to match). `youtube` no longer runs.
 
 ### Added
+- `makezip [folder]` zips a folder (default: the current directory) and
+  everything in it into `<parent>\<name>_yyyy_mm_dd___HH_mm_ss.zip`, beside
+  the folder, with the folder as the archive's top-level entry. The folder
+  is never modified and an existing zip is never overwritten. Also
+  available as "Make a zip version" in the File Explorer right-click menu,
+  on folders only - re-run `setup_explorer_menu.py` to pick it up. See
+  issue #71.
 - `splitfiles <file.mp4>` splits a large file into ~30-minute parts (`-m N`
   for a different length, otherwise prompted, default configurable via
   `splitfiles.minutes`), via ffmpeg's segment muxer with stream copy (no

@@ -45,7 +45,7 @@ part programmatically.
 
 A "Boring" submenu, on files: `move-to` (share/output) plus `negative`,
 `mp4to3`, `splitfiles`, `email-extract` (the last 4 only appear on their
-relevant file types); on folders: `move-to` (share/output) only.
+relevant file types); on folders: `move-to` (share/output) plus `makezip`.
 Registered under `HKCU` (not `HKLM`/`HKCR`), so no admin elevation is
 needed.
 
@@ -451,6 +451,32 @@ saved automatically on first run if missing:
 
 The drop folder (`~/.boring-stuff/<dropFolderName>`) and the output folder
 (`~/.boring-stuff/output`) are created automatically if they don't exist.
+
+#### Makezip
+Zip a folder and everything in it into a timestamped archive, saved next to
+the folder (in its parent directory) - a quick dated snapshot before you
+change something.
+
+Run command:
+
+    makezip [folder]   zip that folder
+    makezip            zip the current working directory
+
+The archive is named `<folder>_yyyy_mm_dd___HH_mm_ss.zip` (24-hour local
+time, three underscores between date and time), e.g. zipping
+`C:\Work\Report` creates `C:\Work\Report_2026_09_26___14_05_33.zip`. The
+folder itself is the zip's top-level entry, so extracting gives back a
+`Report\...` folder. Everything inside is included - no exclusions (`.git`,
+`node_modules`, ... are zipped too). The folder is never modified; an
+existing zip of the same name is never overwritten (a `(1)`, `(2)`, ...
+suffix is added). Prints the created archive's path and size.
+
+A path that doesn't exist, a file, or a drive root (no parent to write
+into) prints a message and exits non-zero.
+
+Also available from the File Explorer right-click menu on folders, as
+"Make a zip version" (see "Add Boring Stuff to the File Explorer
+right-click menu" above).
 
 #### Move-to
 Move a file or folder to a cloud-synced destination - `-s` for the shared
